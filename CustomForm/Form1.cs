@@ -15,13 +15,14 @@ namespace CustomForm
 		private void button1_Click(object sender,EventArgs e)
 		{
 			this.ClientSize = new System.Drawing.Size(300,200);
-			ShowTsHelp = false;
-			ShowTsMenu = false;
+			//ShowTsHelp = false;
+			//ShowTsMenu = false;
 			TitleColor = Color.LightBlue;
 			BackgroundColor = Color.LightGray;
 			StatusBarColor = Color.Gray;
 			Title = "Pippo";
 			StatusText = "OK";
+			//ShowTsMaxMin = false;	
 		}
 	}
 }

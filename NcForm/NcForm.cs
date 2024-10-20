@@ -3,8 +3,33 @@
 
 namespace NcForms
 {
+
+	public enum NcFormWindowState
+	{
+		/// <summary>
+		///  A default sized window.
+		/// </summary>
+		Normal = FormWindowState.Normal,
+		/// <summary>
+		///  A minimized window.
+		/// </summary>
+		Minimized = FormWindowState.Minimized,
+
+		/// <summary>
+		///  A maximized window.
+		/// </summary>
+		Maximized = FormWindowState.Maximized,
+
+		/// <summary>
+		/// Title bar only window.
+		/// </summary>
+		BarOnly = 3
+	}
+
+
 	public class NcForm:Form
 	{
+
 		public const int tsItemExtraWidth = 4;
 
 		private System.ComponentModel.IContainer components;
@@ -32,7 +57,68 @@ namespace NcForms
 		private ToolStripButton tsMin;
 		private ToolStripButton tsMax;
 		private ToolStripButton tsBar;
-		bool isBarOnly, isNormal;
+
+		//bool isBarOnly, isNormal;
+		NcFormWindowState ncWindowsState, prevNcWindowsState;
+
+		protected NcFormWindowState NcWindowsState
+		{
+			get	{return ncWindowsState;}
+			set
+			{
+				switch(value)
+				{
+					case NcFormWindowState.Normal:
+						this.WindowState = FormWindowState.Normal;
+						this.prevNcWindowsState = ncWindowsState;
+						if(this.prevNcWindowsState == NcFormWindowState.BarOnly)
+						{
+							this.Size = prevSz;
+							tsStat.Visible = true;
+							tsMin.Visible = tsMax.Visible = true;
+							this.ncWindowsState = NcFormWindowState.Normal;
+						}
+						else if(this.prevNcWindowsState == NcFormWindowState.Minimized)
+						{
+							tsStat.Visible = true;
+							this.ncWindowsState = NcFormWindowState.Normal;
+						}
+						tsMax.Text = "+";
+						break;
+
+					case NcFormWindowState.Minimized:
+						this.WindowState = FormWindowState.Minimized;
+						this.prevNcWindowsState = ncWindowsState;
+						this.ncWindowsState = NcFormWindowState.Minimized;
+						break;
+
+					case NcFormWindowState.Maximized:
+						this.WindowState = FormWindowState.Maximized;
+						tsMax.Text = "-";
+						this.prevNcWindowsState = ncWindowsState;
+						this.ncWindowsState = NcFormWindowState.Maximized;
+						break;
+
+					case NcFormWindowState.BarOnly:
+						this.prevNcWindowsState = ncWindowsState;
+						if(this.prevNcWindowsState == NcFormWindowState.Normal)
+						{
+							this.WindowState = FormWindowState.Normal;
+							prevSz = this.Size;
+							this.ncWindowsState = NcFormWindowState.BarOnly;
+							tsStat.Visible = false;
+							tsMin.Visible = tsMax.Visible = false;
+							this.Size = new Size(Size.Width,ts.Height);
+						}
+						break;
+
+					default:
+						break;
+				}
+
+			}
+
+		}
 
 		protected NcForm()
 		{
@@ -50,10 +136,10 @@ namespace NcForms
 			opacity = 0.7f;
 			showTsHelp = showTsMenu = showTsMaxMin = showTsBar = true;
 			colorTitle = colorStatusBar = colorBackground = Color.White;
-			CheckNormalWindowsState();
-			isBarOnly = false;
+			//CheckNormalWindowsState();
+			//isBarOnly = false;
+			ncWindowsState = prevNcWindowsState = NcFormWindowState.Normal;
 		}
-
 		protected void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NcForm));
@@ -191,7 +277,7 @@ namespace NcForms
 			tsBar.ToolTipText = "BarOnly";
 			tsBar.Click += tsBar_Click;
 			// 
-			// statTs
+			// tsStat
 			// 
 			tsStat.Dock = DockStyle.Bottom;
 			tsStat.Items.AddRange(new ToolStripItem[] { statLabel,reszLabel });
@@ -232,6 +318,7 @@ namespace NcForms
 			MouseEnter += eMouseEnter;
 			MouseLeave += eMouseLeave;
 			MouseUp += NcForm_MouseUp;
+			Resize += NcForm_Resize;
 			ts.ResumeLayout(false);
 			ts.PerformLayout();
 			tsStat.ResumeLayout(false);
@@ -239,7 +326,6 @@ namespace NcForms
 			ResumeLayout(false);
 			PerformLayout();
 		}
-
 		protected void SetupControls(Control control)
 		{
 			SetEnterLeaveForControls(control,eMouseEnter,eMouseLeave);
@@ -269,49 +355,7 @@ namespace NcForms
 				Opacity = opacity;
 			}
 		}
-		protected bool ShowTsHelp
-		{
-			get { return showTsHelp; }
-			set
-			{
-				showTsHelp = value;
-				tsHelp.Visible = value;
-				tsmiHelp.Visible = value;
-				SetTitle();
-			}
-		}
-		protected bool ShowTsMaxMin
-		{
-			get { return showTsMaxMin; }
-			set
-			{
-				showTsMaxMin = value;
-				tsMax.Visible = value;
-				tsMin.Visible = value;
-				SetTitle();
-			}
-		}
-		protected bool ShowTsBar
-		{
-			get { return showTsBar; }
-			set
-			{
-				showTsBar = value;
-				tsBar.Visible = value;
-				SetTitle();
-			}
-		}
-		protected bool ShowTsMenu
-		{
-			get { return showTsMenu; }
-			set
-			{
-				showTsMenu = value;
-				tsMenu.Visible = value;
-				SetTitle();
-			}
-		}
-
+		
 		protected Color TitleColor
 		{
 			get { return colorTitle; }
@@ -340,11 +384,50 @@ namespace NcForms
 			}
 		}
 
-		private bool CheckNormalWindowsState()
+		private bool ShowTsHelp
 		{
-			isNormal = (this.WindowState == FormWindowState.Normal);
-			return isNormal;
+			get { return showTsHelp; }
+			set
+			{
+				showTsHelp = value;
+				tsHelp.Visible = value;
+				tsmiHelp.Visible = value;
+				SetTitle();
+			}
 		}
+		private bool ShowTsMaxMin
+		{
+			get { return showTsMaxMin; }
+			set
+			{
+				showTsMaxMin = value;
+				tsMax.Visible = value;
+				tsMin.Visible = value;
+				SetTitle();
+			}
+		}
+		private bool ShowTsBar
+		{
+			get { return showTsBar; }
+			set
+			{
+				showTsBar = value;
+				tsBar.Visible = value;
+				SetTitle();
+			}
+		}
+		private bool ShowTsMenu
+		{
+			get { return showTsMenu; }
+			set
+			{
+				showTsMenu = value;
+				tsMenu.Visible = value;
+				SetTitle();
+			}
+		}
+
+
 		private void SetTitle(string? txt = null)
 		{
 #warning Correggere il centraggio del testo, non è preciso
@@ -461,7 +544,7 @@ namespace NcForms
 		}
 		private void Mouse_Down(object sender,MouseEventArgs e)
 		{
-			if(isNormal || isBarOnly)
+			if((NcWindowsState == NcFormWindowState.Normal) || (NcWindowsState == NcFormWindowState.BarOnly))
 			{
 				startDrag = this.Location;
 				startCur = Cursor.Position;
@@ -484,13 +567,13 @@ namespace NcForms
 		}
 		private void Mouse_Move(object sender,MouseEventArgs e)
 		{
-			if(dragging && (isNormal || isBarOnly))
+			if(dragging && ((NcWindowsState == NcFormWindowState.Normal) || (NcWindowsState == NcFormWindowState.BarOnly) ))
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startCur));
 				this.Location = Point.Add(startDrag,new Size(dif));
 				Invalidate();
 			}
-			if(resizing && isNormal)
+			if(resizing && (NcWindowsState == NcFormWindowState.Normal))
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startResz));
 				Size newSz = Size.Add(startSz,new Size(dif));
@@ -511,7 +594,7 @@ namespace NcForms
 		}
 		private void reszLabel_MouseDown(object sender,MouseEventArgs e)
 		{
-			if(isNormal)
+			if(NcWindowsState == NcFormWindowState.Normal)
 			{
 				resizing = true;
 				startResz = Cursor.Position;
@@ -529,51 +612,56 @@ namespace NcForms
 				NcForm_ResizeEnd(sender,e);
 			}
 		}
-
 		private void NcForm_ResizeEnd(object sender,EventArgs e)
 		{
 			SetTitle();
 		}
 
+
 		private void tsMin_Click(object sender,EventArgs e)
 		{
-			this.WindowState = FormWindowState.Minimized;
-			isNormal = isBarOnly = false;
+			NcWindowsState = NcFormWindowState.Minimized;
 		}
 
 		private void tsMax_Click(object sender,EventArgs e)
 		{
-			if(isBarOnly)
+			if(NcWindowsState == NcFormWindowState.Normal)
 			{
-				this.Size = prevSz;
-				tsStat.Visible = true;
-				isBarOnly = false;
-				CheckNormalWindowsState();
+				NcWindowsState = NcFormWindowState.Maximized;
 			}
-			this.WindowState = (this.WindowState == FormWindowState.Normal) ? FormWindowState.Maximized : FormWindowState.Normal;
-			tsMax.Text = (this.WindowState == FormWindowState.Normal) ? "+" : "-";
-			if(!CheckNormalWindowsState())
+			else
 			{
-				isBarOnly = false;
+				NcWindowsState = NcFormWindowState.Normal;
 			}
 		}
 
 		private void tsBar_Click(object sender,EventArgs e)
 		{
-			if(!isBarOnly && isNormal)
+			if(NcWindowsState == NcFormWindowState.Normal)
 			{
-				prevSz = this.Size;
-				isBarOnly = true;
-				isNormal = false;
-				tsStat.Visible = false;
-				this.Size = new Size(Size.Width, ts.Height);
+				NcWindowsState = NcFormWindowState.BarOnly;
 			}
-			else
+			else if(NcWindowsState == NcFormWindowState.BarOnly)
 			{
-				this.Size = prevSz;
-				tsStat.Visible = true;
-				isBarOnly = false;
-				CheckNormalWindowsState();
+				NcWindowsState = NcFormWindowState.Normal;
+			}
+		}
+
+		//private void NcForm_Shown(object sender,EventArgs e)
+		//{
+		//	MessageBox.Show("Shown");
+		//}
+
+		//private void NcForm_VisibleChanged(object sender,EventArgs e)
+		//{
+		//	MessageBox.Show("VisibleChanged");
+		//}
+
+		private void NcForm_Resize(object sender,EventArgs e)
+		{
+			if(NcWindowsState == NcFormWindowState.Minimized)
+			{
+				NcWindowsState = NcFormWindowState.Normal;
 			}
 		}
 	}
