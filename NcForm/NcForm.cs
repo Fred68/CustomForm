@@ -6,6 +6,7 @@ namespace NcForms
 	public class NcForm:Form
 	{
 		public const int tsItemExtraWidth = 4;
+
 		private System.ComponentModel.IContainer components;
 		private ToolStripDropDownButton tsMenu;
 		private ToolStripButton tsQuit;
@@ -15,19 +16,23 @@ namespace NcForms
 		private ToolStripMenuItem settingsToolStripMenuItem;
 		private ToolStripLabel tsTitle;
 		private ToolStrip ts;
-		private ToolStrip statTs;
+		private ToolStrip tsStat;
 		private ToolStripLabel statLabel;
 		private ToolStripLabel reszLabel;
 		private NcConfig config;
 
 		Point startDrag, startCur, startResz;
-		Size startSz;
+		Size startSz, prevSz;
 		bool dragging;
 		bool resizing;
 		float opacity;
 		Size minTitleSz;
-		bool showHelp, showMenu;
+		bool showTsHelp, showTsMenu, showTsMaxMin, showTsBar;
 		Color colorTitle, colorStatusBar, colorBackground;
+		private ToolStripButton tsMin;
+		private ToolStripButton tsMax;
+		private ToolStripButton tsBar;
+		bool isBarOnly, isNormal;
 
 		protected NcForm()
 		{
@@ -43,34 +48,40 @@ namespace NcForms
 			//config = new NcConfig();
 			dragging = resizing = false;
 			opacity = 0.7f;
-			showHelp = showMenu = true;
+			showTsHelp = showTsMenu = showTsMaxMin = showTsBar = true;
 			colorTitle = colorStatusBar = colorBackground = Color.White;
+			CheckNormalWindowsState();
+			isBarOnly = false;
 		}
 
 		protected void InitializeComponent()
 		{
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NcForm));
 			ts = new ToolStrip();
 			tsMenu = new ToolStripDropDownButton();
 			settingsToolStripMenuItem = new ToolStripMenuItem();
 			tsmiHelp = new ToolStripMenuItem();
 			tsmiQuit = new ToolStripMenuItem();
+			tsTitle = new ToolStripLabel();
 			tsQuit = new ToolStripButton();
 			tsHelp = new ToolStripButton();
-			tsTitle = new ToolStripLabel();
-			statTs = new ToolStrip();
+			tsMax = new ToolStripButton();
+			tsMin = new ToolStripButton();
+			tsBar = new ToolStripButton();
+			tsStat = new ToolStrip();
 			statLabel = new ToolStripLabel();
 			reszLabel = new ToolStripLabel();
 			ts.SuspendLayout();
-			statTs.SuspendLayout();
+			tsStat.SuspendLayout();
 			SuspendLayout();
 			// 
 			// ts
 			// 
 			ts.BackColor = SystemColors.Control;
-			ts.Items.AddRange(new ToolStripItem[] { tsMenu,tsQuit,tsHelp,tsTitle });
+			ts.Items.AddRange(new ToolStripItem[] { tsMenu,tsTitle,tsQuit,tsHelp,tsMax,tsMin,tsBar });
 			ts.Location = new Point(0,0);
 			ts.Name = "ts";
-			ts.Size = new Size(521,25);
+			ts.Size = new Size(679,25);
 			ts.TabIndex = 0;
 			ts.Text = "ts";
 			ts.MouseDown += ts_MouseDown;
@@ -108,6 +119,19 @@ namespace NcForms
 			tsmiQuit.Text = "Quit";
 			tsmiQuit.Click += tsmiQuit_Click;
 			// 
+			// tsTitle
+			// 
+			tsTitle.AutoSize = false;
+			tsTitle.BackColor = SystemColors.Control;
+			tsTitle.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsTitle.ImageTransparentColor = Color.White;
+			tsTitle.Name = "tsTitle";
+			tsTitle.Size = new Size(100,22);
+			tsTitle.Text = "Title";
+			tsTitle.TextImageRelation = TextImageRelation.TextBeforeImage;
+			tsTitle.MouseDown += tsTitle_MouseDown;
+			tsTitle.MouseUp += tsTitle_MouseUp;
+			// 
 			// tsQuit
 			// 
 			tsQuit.Alignment = ToolStripItemAlignment.Right;
@@ -123,33 +147,59 @@ namespace NcForms
 			tsHelp.Alignment = ToolStripItemAlignment.Right;
 			tsHelp.DisplayStyle = ToolStripItemDisplayStyle.Text;
 			tsHelp.Name = "tsHelp";
-			tsHelp.RightToLeft = RightToLeft.Yes;
+			tsHelp.RightToLeft = RightToLeft.No;
 			tsHelp.Size = new Size(23,22);
 			tsHelp.Text = "?";
 			tsHelp.ToolTipText = "Help";
 			// 
-			// tsTitle
+			// tsMax
 			// 
-			tsTitle.AutoSize = false;
-			tsTitle.BackColor = SystemColors.Control;
-			tsTitle.DisplayStyle = ToolStripItemDisplayStyle.Text;
-			tsTitle.ImageTransparentColor = Color.White;
-			tsTitle.Name = "tsTitle";
-			tsTitle.Size = new Size(100,22);
-			tsTitle.Text = "Title";
-			tsTitle.TextImageRelation = TextImageRelation.TextBeforeImage;
-			tsTitle.MouseDown += tsTitle_MouseDown;
-			tsTitle.MouseUp += tsTitle_MouseUp;
+			tsMax.Alignment = ToolStripItemAlignment.Right;
+			tsMax.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsMax.Image = (Image)resources.GetObject("tsMax.Image");
+			tsMax.ImageTransparentColor = Color.Magenta;
+			tsMax.Name = "tsMax";
+			tsMax.RightToLeft = RightToLeft.Yes;
+			tsMax.Size = new Size(23,22);
+			tsMax.Text = "+";
+			tsMax.ToolTipText = "Maximize";
+			tsMax.Click += tsMax_Click;
 			// 
-			// toolStrip1
+			// tsMin
 			// 
-			statTs.Dock = DockStyle.Bottom;
-			statTs.Items.AddRange(new ToolStripItem[] { statLabel,reszLabel });
-			statTs.Location = new Point(0,314);
-			statTs.Name = "statTs";
-			statTs.Size = new Size(521,25);
-			statTs.TabIndex = 2;
-			statTs.Text = "statTs";
+			tsMin.Alignment = ToolStripItemAlignment.Right;
+			tsMin.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsMin.Image = (Image)resources.GetObject("tsMin.Image");
+			tsMin.ImageTransparentColor = Color.Magenta;
+			tsMin.Name = "tsMin";
+			tsMin.RightToLeft = RightToLeft.Yes;
+			tsMin.Size = new Size(23,22);
+			tsMin.Text = "_";
+			tsMin.ToolTipText = "Minimize";
+			tsMin.Click += tsMin_Click;
+			// 
+			// tsBar
+			// 
+			tsBar.Alignment = ToolStripItemAlignment.Right;
+			tsBar.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsBar.Image = (Image)resources.GetObject("tsBar.Image");
+			tsBar.ImageTransparentColor = Color.Magenta;
+			tsBar.Name = "tsBar";
+			tsBar.RightToLeft = RightToLeft.Yes;
+			tsBar.Size = new Size(23,22);
+			tsBar.Text = "=";
+			tsBar.ToolTipText = "BarOnly";
+			tsBar.Click += tsBar_Click;
+			// 
+			// statTs
+			// 
+			tsStat.Dock = DockStyle.Bottom;
+			tsStat.Items.AddRange(new ToolStripItem[] { statLabel,reszLabel });
+			tsStat.Location = new Point(0,349);
+			tsStat.Name = "tsStat";
+			tsStat.Size = new Size(679,25);
+			tsStat.TabIndex = 2;
+			tsStat.Text = "tsStat";
 			// 
 			// statLabel
 			// 
@@ -172,8 +222,8 @@ namespace NcForms
 			// NcForm
 			// 
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(521,339);
-			Controls.Add(statTs);
+			ClientSize = new Size(679,374);
+			Controls.Add(tsStat);
 			Controls.Add(ts);
 			FormBorderStyle = FormBorderStyle.None;
 			Name = "NcForm";
@@ -184,8 +234,8 @@ namespace NcForms
 			MouseUp += NcForm_MouseUp;
 			ts.ResumeLayout(false);
 			ts.PerformLayout();
-			statTs.ResumeLayout(false);
-			statTs.PerformLayout();
+			tsStat.ResumeLayout(false);
+			tsStat.PerformLayout();
 			ResumeLayout(false);
 			PerformLayout();
 		}
@@ -219,21 +269,44 @@ namespace NcForms
 				Opacity = opacity;
 			}
 		}
-		protected bool ShowHelp
+		protected bool ShowTsHelp
 		{
-			get {return showHelp; }	
+			get { return showTsHelp; }
 			set
 			{
+				showTsHelp = value;
 				tsHelp.Visible = value;
 				tsmiHelp.Visible = value;
 				SetTitle();
 			}
 		}
-		protected bool ShowMenu
+		protected bool ShowTsMaxMin
 		{
-			get {return showMenu; }	
+			get { return showTsMaxMin; }
 			set
 			{
+				showTsMaxMin = value;
+				tsMax.Visible = value;
+				tsMin.Visible = value;
+				SetTitle();
+			}
+		}
+		protected bool ShowTsBar
+		{
+			get { return showTsBar; }
+			set
+			{
+				showTsBar = value;
+				tsBar.Visible = value;
+				SetTitle();
+			}
+		}
+		protected bool ShowTsMenu
+		{
+			get { return showTsMenu; }
+			set
+			{
+				showTsMenu = value;
 				tsMenu.Visible = value;
 				SetTitle();
 			}
@@ -241,7 +314,7 @@ namespace NcForms
 
 		protected Color TitleColor
 		{
-			get {return colorTitle; }
+			get { return colorTitle; }
 			set
 			{
 				colorTitle = value;
@@ -250,35 +323,42 @@ namespace NcForms
 		}
 		protected Color StatusBarColor
 		{
-			get {return colorStatusBar; }
+			get { return colorStatusBar; }
 			set
 			{
 				colorStatusBar = value;
-				statTs.BackColor = colorStatusBar;
+				tsStat.BackColor = colorStatusBar;
 			}
 		}
 		protected Color BackgroundColor
 		{
-			get {return colorBackground; }
+			get { return colorBackground; }
 			set
 			{
 				colorBackground = value;
 				this.BackColor = colorBackground;
 			}
 		}
+
+		private bool CheckNormalWindowsState()
+		{
+			isNormal = (this.WindowState == FormWindowState.Normal);
+			return isNormal;
+		}
 		private void SetTitle(string? txt = null)
 		{
-			#warning Correggere il centraggio del testo, non è corretto
-			if (txt != null)	tsTitle.Text = txt;
+#warning Correggere il centraggio del testo, non è preciso
+			if(txt != null) tsTitle.Text = txt;
 			tsTitle.AutoSize = true;
 			minTitleSz = tsTitle.Size;
 			tsTitle.AutoSize = false;
 			int availWidth = this.Width
-								- (showMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
-								- (showHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
-								- (tsQuit.Width + tsItemExtraWidth ) ;
+								- (showTsMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
+								- (showTsHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
+								- (showTsMaxMin ? tsMax.Width + tsMin.Width + tsBar.Width + 3 * tsItemExtraWidth : 3 * tsItemExtraWidth)
+								- (tsQuit.Width + tsItemExtraWidth);
 			if(availWidth < minTitleSz.Width)
-			{		
+			{
 				tsTitle.Visible = false;
 			}
 			else
@@ -381,11 +461,13 @@ namespace NcForms
 		}
 		private void Mouse_Down(object sender,MouseEventArgs e)
 		{
-			startDrag = this.Location;
-			startCur = Cursor.Position;
-			dragging = true;
-			this.Capture = true;
-			//SetTextStatus($"MouseDown {e.Location.ToString()}");
+			if(isNormal || isBarOnly)
+			{
+				startDrag = this.Location;
+				startCur = Cursor.Position;
+				dragging = true;
+				this.Capture = true;
+			}
 		}
 		private void Mouse_Up(object sender,MouseEventArgs e)
 		{
@@ -402,13 +484,13 @@ namespace NcForms
 		}
 		private void Mouse_Move(object sender,MouseEventArgs e)
 		{
-			if(dragging)
+			if(dragging && (isNormal || isBarOnly))
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startCur));
 				this.Location = Point.Add(startDrag,new Size(dif));
 				Invalidate();
 			}
-			if(resizing)
+			if(resizing && isNormal)
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startResz));
 				Size newSz = Size.Add(startSz,new Size(dif));
@@ -429,10 +511,13 @@ namespace NcForms
 		}
 		private void reszLabel_MouseDown(object sender,MouseEventArgs e)
 		{
-			resizing = true;
-			startResz = Cursor.Position;
-			startSz = this.Size;
-			this.Capture = true;
+			if(isNormal)
+			{
+				resizing = true;
+				startResz = Cursor.Position;
+				startSz = this.Size;
+				this.Capture = true;
+			}
 		}
 		// Con this.Capture, gli eventi del mouse sono catturati dal form, non da reszLabel_MouseUp(...)
 		private void NcForm_MouseUp(object sender,MouseEventArgs e)
@@ -441,13 +526,55 @@ namespace NcForms
 			{
 				this.Capture = false;
 				resizing = false;
-				NcForm_ResizeEnd(sender, e);
+				NcForm_ResizeEnd(sender,e);
 			}
 		}
 
 		private void NcForm_ResizeEnd(object sender,EventArgs e)
 		{
 			SetTitle();
+		}
+
+		private void tsMin_Click(object sender,EventArgs e)
+		{
+			this.WindowState = FormWindowState.Minimized;
+			isNormal = isBarOnly = false;
+		}
+
+		private void tsMax_Click(object sender,EventArgs e)
+		{
+			if(isBarOnly)
+			{
+				this.Size = prevSz;
+				tsStat.Visible = true;
+				isBarOnly = false;
+				CheckNormalWindowsState();
+			}
+			this.WindowState = (this.WindowState == FormWindowState.Normal) ? FormWindowState.Maximized : FormWindowState.Normal;
+			tsMax.Text = (this.WindowState == FormWindowState.Normal) ? "+" : "-";
+			if(!CheckNormalWindowsState())
+			{
+				isBarOnly = false;
+			}
+		}
+
+		private void tsBar_Click(object sender,EventArgs e)
+		{
+			if(!isBarOnly && isNormal)
+			{
+				prevSz = this.Size;
+				isBarOnly = true;
+				isNormal = false;
+				tsStat.Visible = false;
+				this.Size = new Size(Size.Width, ts.Height);
+			}
+			else
+			{
+				this.Size = prevSz;
+				tsStat.Visible = true;
+				isBarOnly = false;
+				CheckNormalWindowsState();
+			}
 		}
 	}
 }
