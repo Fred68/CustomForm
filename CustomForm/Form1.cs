@@ -2,16 +2,15 @@ using NcForms;
 
 namespace CustomForm
 {
-	public partial class Form1:NcForms.NcForm
+	public partial class Form1 : NcForms.NcForm
 	{
 
-		public Form1(NcWindowsStyles style) : base(style)
+		public Form1(NcFormStyle style, NcFormColor color) : base(style, color)
 		{
 
 			InitializeComponent();
-			FormOpacity = 0.5f;
 			
-			SetupControls(this);
+			//SetupControls(this);
 		}
 
 		private void button1_Click(object sender,EventArgs e)
@@ -22,6 +21,7 @@ namespace CustomForm
 			StatusBarColor = Color.Gray;
 			Title = "Pippo";
 			StatusText = "OK";
+			Opacity = 0.1f;
 		}
 	}
 }

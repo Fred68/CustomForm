@@ -3,50 +3,13 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace NcForms
 {
-	/// <summary>
-	/// NcWindowsStyles flags
-	/// </summary>
-	[Flags]
-	public enum NcWindowsStyles
-	{
-		None		= 0,
-		Menu		= 1 << 0,
-		MinMax		= 1 << 1,
-		Help		= 1 << 2,
-		Resizable	= 1 << 3,
-		TopMost		= 1 << 4,
-		All			= -1
-	}
 
-	/// <summary>
-	/// NcWindowsState enumeration
-	/// </summary>
-	public enum NcFormWindowState
-	{
-		/// <summary>
-		///  A default sized window.
-		/// </summary>
-		Normal = FormWindowState.Normal,
-		/// <summary>
-		///  A minimized window.
-		/// </summary>
-		Minimized = FormWindowState.Minimized,
-		/// <summary>
-		///  A maximized window.
-		/// </summary>
-		Maximized = FormWindowState.Maximized,
-		/// <summary>
-		/// Title bar only window.
-		/// </summary>
-		BarOnly = 3
-	}
 
 	/// <summary>
 	/// Non Client Area Window base class
 	/// </summary>
 	public class NcForm:Form
 	{
-
 		public const int tsItemExtraWidth = 4;
 
 		private System.ComponentModel.IContainer components;
@@ -61,7 +24,6 @@ namespace NcForms
 		private ToolStrip tsStat;
 		private ToolStripLabel statLabel;
 		private ToolStripLabel reszLabel;
-		private NcConfig config;
 
 		Point startDrag, startCur, startResz;
 		Size startSz, prevSz;
@@ -83,22 +45,27 @@ namespace NcForms
 		bool isResizable;
 		bool hasTopMost;
 
-		NcFormWindowState ncWindowsState, prevNcWindowsState;
+		NcFormWindowStates ncWindowsState, prevNcWindowsState;
 
 #pragma warning disable CS8618
+
+		/// <summary>
+		/// Empty constructor
+		/// </summary>
+		public NcForm() : this(NcFormStyle.Normal, NcFormColor.Normal) { }
+
 		/// <summary>
 		/// Constructor with params.
 		/// NcForm potentially null fields are checked by a try...catch
 		/// </summary>
-		/// <param name="style"></param>	
-		public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
+		/// <param name="style"></param>		
+		public NcForm(NcFormStyle style, NcFormColor color)        // public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
 		{
-
-			hasMenu = (style & NcWindowsStyles.Menu) != 0;
-			hasMinMax = (style & NcWindowsStyles.MinMax) != 0;
-			hasHelp = (style & NcWindowsStyles.Help) != 0;
-			isResizable = (style & NcWindowsStyles.Resizable) != 0;
-			hasTopMost = (style & NcWindowsStyles.TopMost) != 0;
+			hasMenu = (style.ncWindowsStyle & NcWindowsStyles.Menu) != 0;
+			hasMinMax = (style.ncWindowsStyle & NcWindowsStyles.MinMax) != 0;
+			hasHelp = (style.ncWindowsStyle & NcWindowsStyles.Help) != 0;
+			isResizable = (style.ncWindowsStyle & NcWindowsStyles.Resizable) != 0;
+			hasTopMost = (style.ncWindowsStyle & NcWindowsStyles.TopMost) != 0;
 
 			try
 			{
@@ -116,67 +83,71 @@ namespace NcForms
 			showTsMaxMin = true;        // Show maximize / minimize buttons
 			showTsBar = true;           // Show OnlyBar button
 			showTsTop = true;           // Show Topmost button
-			colorTitle = colorStatusBar = colorBackground = Color.White;
-
 			TopMost = hasTopMost;       // Imposta subito lo stato topMost in base al flag
 
-			ncWindowsState = prevNcWindowsState = NcFormWindowState.Normal;
+			ncWindowsState = prevNcWindowsState = style.ncFormWindowState;
+
+			TitleColor = color.titleBarColor;
+			StatusBarColor = color.statusBarColor;
+			BackgroundColor = color.backgroundColor;
+			Opacity = color.opacity;
+
 		}
 #pragma warning restore
 
 		/// <summary>
 		/// Set/Get WindowsState: Minimized, Maximized, Normal, BarOnly
 		/// </summary>
-		protected NcFormWindowState NcWindowsState
+		protected NcFormWindowStates NcWindowsState
 		{
 			get { return ncWindowsState; }
 			set
 			{
 				switch(value)
 				{
-					case NcFormWindowState.Normal:
+					case NcFormWindowStates.Normal:
 						this.WindowState = FormWindowState.Normal;
 						this.prevNcWindowsState = ncWindowsState;
-						if(this.prevNcWindowsState == NcFormWindowState.BarOnly)
+						if(this.prevNcWindowsState == NcFormWindowStates.BarOnly)
 						{
 							this.Size = prevSz;
 							tsStat.Visible = true;
 							tsMin.Visible = tsMax.Visible = true;
-							this.ncWindowsState = NcFormWindowState.Normal;
+							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
-						else if(this.prevNcWindowsState == NcFormWindowState.Minimized)
+						else if(this.prevNcWindowsState == NcFormWindowStates.Minimized)
 						{
 							tsStat.Visible = true;
-							this.ncWindowsState = NcFormWindowState.Normal;
+							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
-						else if(this.prevNcWindowsState == NcFormWindowState.Maximized)
+						else if(this.prevNcWindowsState == NcFormWindowStates.Maximized)
 						{
 							tsStat.Visible = true;
-							this.ncWindowsState = NcFormWindowState.Normal;
+							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
 						tsMax.Text = "+";
 						break;
 
-					case NcFormWindowState.Minimized:
+					case NcFormWindowStates.Minimized:
 						this.WindowState = FormWindowState.Minimized;
 						this.prevNcWindowsState = ncWindowsState;
-						this.ncWindowsState = NcFormWindowState.Minimized;
+						this.ncWindowsState = NcFormWindowStates.Minimized;
 						break;
 
-					case NcFormWindowState.Maximized:
+					case NcFormWindowStates.Maximized:
 						this.WindowState = FormWindowState.Maximized;
 						tsMax.Text = "-";
 						this.prevNcWindowsState = ncWindowsState;
-						this.ncWindowsState = NcFormWindowState.Maximized;
+						this.ncWindowsState = NcFormWindowStates.Maximized;
 						break;
 
-					case NcFormWindowState.BarOnly:
+					case NcFormWindowStates.BarOnly:
 						this.prevNcWindowsState = ncWindowsState;
-						if(this.prevNcWindowsState == NcFormWindowState.Normal)
+						if(this.prevNcWindowsState == NcFormWindowStates.Normal)
 						{
 							this.WindowState = FormWindowState.Normal;
 							prevSz = this.Size;
-							this.ncWindowsState = NcFormWindowState.BarOnly;
+							this.ncWindowsState = NcFormWindowStates.BarOnly;
 							tsStat.Visible = false;
 							tsMin.Visible = tsMax.Visible = false;
 							this.Size = new Size(Size.Width,ts.Height);
@@ -219,7 +190,7 @@ namespace NcForms
 			ts.Items.AddRange(new ToolStripItem[] { tsMenu,tsTop,tsTitle,tsQuit,tsHelp,tsMax,tsMin,tsBar });
 			ts.Location = new Point(0,0);
 			ts.Name = "ts";
-			ts.Size = new Size(679,25);
+			ts.Size = new Size(596,25);
 			ts.TabIndex = 0;
 			ts.Text = "ts";
 			ts.MouseDown += ts_MouseDown;
@@ -345,9 +316,9 @@ namespace NcForms
 			// 
 			tsStat.Dock = DockStyle.Bottom;
 			tsStat.Items.AddRange(new ToolStripItem[] { statLabel,reszLabel });
-			tsStat.Location = new Point(0,349);
+			tsStat.Location = new Point(0,351);
 			tsStat.Name = "tsStat";
-			tsStat.Size = new Size(679,25);
+			tsStat.Size = new Size(596,25);
 			tsStat.TabIndex = 2;
 			tsStat.Text = "tsStat";
 			// 
@@ -372,12 +343,13 @@ namespace NcForms
 			// NcForm
 			// 
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(679,374);
+			ClientSize = new Size(596,376);
 			Controls.Add(tsStat);
 			Controls.Add(ts);
 			FormBorderStyle = FormBorderStyle.None;
 			Name = "NcForm";
 			FormClosing += NcForm_FormClosing;
+			Load += NcForm_Load;
 			ResizeEnd += NcForm_ResizeEnd;
 			MouseEnter += eMouseEnter;
 			MouseLeave += eMouseLeave;
@@ -401,6 +373,7 @@ namespace NcForms
 			SetEnterLeaveForSingleControl(ts,eMouseEnter,eMouseLeave,etsMouseEnter,etsMouseLeave);
 			SetMouseMoveSingleControl(ts,Mouse_Move);
 			SetTitleBar();
+
 		}
 		/// <summary>
 		/// Text on the status bar
@@ -424,13 +397,13 @@ namespace NcForms
 		/// <summary>
 		/// Opacity
 		/// </summary>
-		protected float FormOpacity
+		protected new float Opacity
 		{
 			get { return opacity; }
 			set
 			{
 				opacity = value;
-				Opacity = opacity;
+				base.Opacity = opacity;
 			}
 		}
 		/// <summary>
@@ -553,11 +526,11 @@ namespace NcForms
 		}
 		private void eMouseEnter(object sender,EventArgs e)
 		{
-			Opacity = 1f;
+			base.Opacity = 1f;
 		}
 		private void eMouseLeave(object sender,EventArgs e)
 		{
-			Opacity = FormOpacity;
+			base.Opacity = Opacity;
 		}
 		private void etsMouseEnter(object sender,EventArgs e)
 		{
@@ -589,7 +562,7 @@ namespace NcForms
 		}
 		private void Mouse_Down(object sender,MouseEventArgs e)
 		{
-			if((NcWindowsState == NcFormWindowState.Normal) || (NcWindowsState == NcFormWindowState.BarOnly))
+			if((NcWindowsState == NcFormWindowStates.Normal) || (NcWindowsState == NcFormWindowStates.BarOnly))
 			{
 				startDrag = this.Location;
 				startCur = Cursor.Position;
@@ -612,13 +585,13 @@ namespace NcForms
 		}
 		private void Mouse_Move(object sender,MouseEventArgs e)
 		{
-			if(dragging && ((NcWindowsState == NcFormWindowState.Normal) || (NcWindowsState == NcFormWindowState.BarOnly)))
+			if(dragging && ((NcWindowsState == NcFormWindowStates.Normal) || (NcWindowsState == NcFormWindowStates.BarOnly)))
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startCur));
 				this.Location = Point.Add(startDrag,new Size(dif));
 				Invalidate();
 			}
-			if(resizing && (NcWindowsState == NcFormWindowState.Normal))
+			if(resizing && (NcWindowsState == NcFormWindowStates.Normal))
 			{
 				Point dif = Point.Subtract(Cursor.Position,new Size(startResz));
 				Size newSz = Size.Add(startSz,new Size(dif));
@@ -638,7 +611,7 @@ namespace NcForms
 		}
 		private void reszLabel_MouseDown(object sender,MouseEventArgs e)
 		{
-			if(NcWindowsState == NcFormWindowState.Normal)
+			if(NcWindowsState == NcFormWindowStates.Normal)
 			{
 				resizing = true;
 				startResz = Cursor.Position;
@@ -666,28 +639,28 @@ namespace NcForms
 		}
 		private void tsMin_Click(object sender,EventArgs e)
 		{
-			NcWindowsState = NcFormWindowState.Minimized;
+			NcWindowsState = NcFormWindowStates.Minimized;
 		}
 		private void tsMax_Click(object sender,EventArgs e)
 		{
-			if(NcWindowsState == NcFormWindowState.Normal)
+			if(NcWindowsState == NcFormWindowStates.Normal)
 			{
-				NcWindowsState = NcFormWindowState.Maximized;
+				NcWindowsState = NcFormWindowStates.Maximized;
 			}
 			else
 			{
-				NcWindowsState = NcFormWindowState.Normal;
+				NcWindowsState = NcFormWindowStates.Normal;
 			}
 		}
 		private void tsBar_Click(object sender,EventArgs e)
 		{
-			if(NcWindowsState == NcFormWindowState.Normal)
+			if(NcWindowsState == NcFormWindowStates.Normal)
 			{
-				NcWindowsState = NcFormWindowState.BarOnly;
+				NcWindowsState = NcFormWindowStates.BarOnly;
 			}
-			else if(NcWindowsState == NcFormWindowState.BarOnly)
+			else if(NcWindowsState == NcFormWindowStates.BarOnly)
 			{
-				NcWindowsState = NcFormWindowState.Normal;
+				NcWindowsState = NcFormWindowStates.Normal;
 			}
 		}
 		/// <summary>
@@ -697,9 +670,9 @@ namespace NcForms
 		/// <param name="e"></param>
 		private void NcForm_Resize(object sender,EventArgs e)
 		{
-			if(NcWindowsState == NcFormWindowState.Minimized)
+			if(NcWindowsState == NcFormWindowStates.Minimized)
 			{
-				NcWindowsState = NcFormWindowState.Normal;
+				NcWindowsState = NcFormWindowStates.Normal;
 			}
 		}
 		private void tsTop_Click(object sender,EventArgs e)
@@ -707,12 +680,15 @@ namespace NcForms
 			TopMost = !(TopMost);   // Scambia lo stato
 			tsTop.Text = TopMost ? "T" : "t";
 		}
-
 		private void tsHelp_Click(object sender,EventArgs e)
 		{
 			MessageBox.Show("Help");
 		}
-
-		
+		private void NcForm_Load(object sender,EventArgs e)
+		{
+			SetupControls(this);
+			NcWindowsState = ncWindowsState;
+		}
 	}
+
 }

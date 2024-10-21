@@ -40,7 +40,7 @@
 			toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
 			toolStrip1.Location = new Point(0,25);
 			toolStrip1.Name = "toolStrip1";
-			toolStrip1.Size = new Size(355,25);
+			toolStrip1.Size = new Size(529,25);
 			toolStrip1.TabIndex = 1;
 			toolStrip1.Text = "toolStrip1";
 			// 
@@ -55,9 +55,9 @@
 			// 
 			// button1
 			// 
-			button1.Location = new Point(33,114);
+			button1.Location = new Point(37,104);
 			button1.Name = "button1";
-			button1.Size = new Size(75,23);
+			button1.Size = new Size(71,38);
 			button1.TabIndex = 2;
 			button1.Text = "button1";
 			button1.UseVisualStyleBackColor = true;
@@ -68,7 +68,7 @@
 			AutoScaleDimensions = new SizeF(7F,15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(355,306);
+			ClientSize = new Size(529,361);
 			Controls.Add(button1);
 			Controls.Add(toolStrip1);
 			Name = "Form1";
