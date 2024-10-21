@@ -44,7 +44,7 @@ namespace NcForms
 	/// <summary>
 	/// Non Client Area Window base class
 	/// </summary>
-	public class NcForm : Form
+	public class NcForm:Form
 	{
 
 		public const int tsItemExtraWidth = 4;
@@ -68,7 +68,7 @@ namespace NcForms
 		bool dragging;
 		bool resizing;
 		float opacity;
-		
+
 		Size minTitleSz;
 		bool showTsHelp, showTsMenu, showTsMaxMin, showTsBar, showTsTop;
 		Color colorTitle, colorStatusBar, colorBackground;
@@ -85,14 +85,13 @@ namespace NcForms
 
 		NcFormWindowState ncWindowsState, prevNcWindowsState;
 
-		
+#pragma warning disable CS8618
 		/// <summary>
 		/// Constructor with params.
 		/// NcForm potentially null fields are checked by a try...catch
 		/// </summary>
 		/// <param name="style"></param>	
-		#pragma warning disable CS8618	
-		protected NcForm(NcWindowsStyles style = NcWindowsStyles.All)
+		public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
 		{
 
 			hasMenu = (style & NcWindowsStyles.Menu) != 0;
@@ -116,14 +115,14 @@ namespace NcForms
 			showTsMenu = true;          // Show dropdown menu
 			showTsMaxMin = true;        // Show maximize / minimize buttons
 			showTsBar = true;           // Show OnlyBar button
-			showTsTop = true;			// Show Topmost button
+			showTsTop = true;           // Show Topmost button
 			colorTitle = colorStatusBar = colorBackground = Color.White;
-			
-			TopMost = hasTopMost;		// Imposta subito lo stato topMost in base al flag
-			
+
+			TopMost = hasTopMost;       // Imposta subito lo stato topMost in base al flag
+
 			ncWindowsState = prevNcWindowsState = NcFormWindowState.Normal;
 		}
-		#pragma warning restore
+#pragma warning restore
 
 		/// <summary>
 		/// Set/Get WindowsState: Minimized, Maximized, Normal, BarOnly
@@ -200,6 +199,7 @@ namespace NcForms
 			settingsToolStripMenuItem = new ToolStripMenuItem();
 			tsmiHelp = new ToolStripMenuItem();
 			tsmiQuit = new ToolStripMenuItem();
+			tsTop = new ToolStripButton();
 			tsTitle = new ToolStripLabel();
 			tsQuit = new ToolStripButton();
 			tsHelp = new ToolStripButton();
@@ -209,7 +209,6 @@ namespace NcForms
 			tsStat = new ToolStrip();
 			statLabel = new ToolStripLabel();
 			reszLabel = new ToolStripLabel();
-			tsTop = new ToolStripButton();
 			ts.SuspendLayout();
 			tsStat.SuspendLayout();
 			SuspendLayout();
@@ -249,7 +248,7 @@ namespace NcForms
 			tsmiHelp.Name = "tsmiHelp";
 			tsmiHelp.Size = new Size(116,22);
 			tsmiHelp.Text = "Help";
-			tsmiHelp.Click += tsmiHelp_Click;
+			tsmiHelp.Click += tsHelp_Click;
 			// 
 			// tsmiQuit
 			// 
@@ -257,6 +256,17 @@ namespace NcForms
 			tsmiQuit.Size = new Size(116,22);
 			tsmiQuit.Text = "Quit";
 			tsmiQuit.Click += tsmiQuit_Click;
+			// 
+			// tsTop
+			// 
+			tsTop.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsTop.Image = (Image)resources.GetObject("tsTop.Image");
+			tsTop.ImageTransparentColor = Color.Magenta;
+			tsTop.Name = "tsTop";
+			tsTop.Size = new Size(23,22);
+			tsTop.Text = "T";
+			tsTop.ToolTipText = "OnTop";
+			tsTop.Click += tsTop_Click;
 			// 
 			// tsTitle
 			// 
@@ -279,7 +289,7 @@ namespace NcForms
 			tsQuit.Size = new Size(23,22);
 			tsQuit.Text = "X";
 			tsQuit.ToolTipText = "Close";
-			tsQuit.Click += tsHelp_Click;
+			tsQuit.Click += tsClose_Click;
 			// 
 			// tsHelp
 			// 
@@ -290,6 +300,7 @@ namespace NcForms
 			tsHelp.Size = new Size(23,22);
 			tsHelp.Text = "?";
 			tsHelp.ToolTipText = "Help";
+			tsHelp.Click += tsHelp_Click;
 			// 
 			// tsMax
 			// 
@@ -357,16 +368,6 @@ namespace NcForms
 			reszLabel.MouseDown += reszLabel_MouseDown;
 			reszLabel.MouseEnter += reszLabel_MouseEnter;
 			reszLabel.MouseLeave += reszLabel_MouseLeave;
-			// 
-			// tsTop
-			// 
-			tsTop.DisplayStyle = ToolStripItemDisplayStyle.Text;
-			tsTop.Image = (Image)resources.GetObject("tsTop.Image");
-			tsTop.ImageTransparentColor = Color.Magenta;
-			tsTop.Name = "tsTop";
-			tsTop.Size = new Size(23,22);
-			tsTop.Text = "T";
-			tsTop.Click += tsTop_Click;
 			// 
 			// NcForm
 			// 
@@ -488,7 +489,7 @@ namespace NcForms
 			tsTitle.AutoSize = true;
 			minTitleSz = tsTitle.Size;
 			tsTitle.AutoSize = false;
-			
+
 			int availWidth = this.Width
 								- (showTsMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
 								- (showTsHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
@@ -528,14 +529,9 @@ namespace NcForms
 		{
 			this.MouseMove += eVmouseMove;
 		}
-		private void tsHelp_Click(object sender,EventArgs e)
+		private void tsClose_Click(object sender,EventArgs e)
 		{
-			//statLabel.Text = "Quit";
 			Close();
-		}
-		private void tsmiHelp_Click(object sender,EventArgs e)
-		{
-			statLabel.Text = "Help";
 		}
 		private void tsmiQuit_Click(object sender,EventArgs e)
 		{
@@ -708,8 +704,15 @@ namespace NcForms
 		}
 		private void tsTop_Click(object sender,EventArgs e)
 		{
-			TopMost = !(TopMost);	// Scambia lo stato
+			TopMost = !(TopMost);   // Scambia lo stato
 			tsTop.Text = TopMost ? "T" : "t";
 		}
+
+		private void tsHelp_Click(object sender,EventArgs e)
+		{
+			MessageBox.Show("Help");
+		}
+
+		
 	}
 }

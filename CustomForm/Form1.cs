@@ -2,10 +2,10 @@ using NcForms;
 
 namespace CustomForm
 {
-	public partial class Form1 : NcForms.NcForm
+	public partial class Form1:NcForms.NcForm
 	{
 
-		public Form1(NcWindowsStyles style) : base (style)	
+		public Form1(NcWindowsStyles style) : base(style)
 		{
 
 			InitializeComponent();
