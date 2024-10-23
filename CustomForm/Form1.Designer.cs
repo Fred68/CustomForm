@@ -30,8 +30,8 @@
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
 			toolStrip1 = new ToolStrip();
-			toolStripButton1 = new ToolStripButton();
 			button1 = new Button();
+			toolStripButton1 = new ToolStripButton();
 			toolStrip1.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -44,15 +44,6 @@
 			toolStrip1.TabIndex = 1;
 			toolStrip1.Text = "toolStrip1";
 			// 
-			// toolStripButton1
-			// 
-			toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
-			toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
-			toolStripButton1.ImageTransparentColor = Color.Magenta;
-			toolStripButton1.Name = "toolStripButton1";
-			toolStripButton1.Size = new Size(23,22);
-			toolStripButton1.Text = "toolStripButton1";
-			// 
 			// button1
 			// 
 			button1.Location = new Point(37,104);
@@ -62,6 +53,15 @@
 			button1.Text = "button1";
 			button1.UseVisualStyleBackColor = true;
 			button1.Click += button1_Click;
+			// 
+			// toolStripButton1
+			// 
+			toolStripButton1.DisplayStyle = ToolStripItemDisplayStyle.Image;
+			toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
+			toolStripButton1.ImageTransparentColor = Color.Magenta;
+			toolStripButton1.Name = "toolStripButton1";
+			toolStripButton1.Size = new Size(23,22);
+			toolStripButton1.Text = "toolStripButton1";
 			// 
 			// Form1
 			// 
@@ -84,7 +84,7 @@
 		#endregion
 
 		private ToolStrip toolStrip1;
-		private ToolStripButton toolStripButton1;
 		private Button button1;
+		private ToolStripButton toolStripButton1;
 	}
 }

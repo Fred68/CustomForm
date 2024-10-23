@@ -49,19 +49,11 @@
 	{
 		public NcWindowsStyles		ncWindowsStyle;
 		public NcFormWindowStates	ncFormWindowState;
-		//public Color				backgroundColor;
-		//public Color				titleBarColor;
-		//public Color				statusBarColor;
-		//public float				opacity;
 
 		public NcFormStyle(	NcWindowsStyles ncwStyle, NcFormWindowStates ncfwState/*, Color bkgnd, Color title, Color status, float opac*/)
 		{
 			ncWindowsStyle		= ncwStyle;
 			ncFormWindowState	= ncfwState;
-			//backgroundColor		= bkgnd;
-			//titleBarColor		= title;
-			//statusBarColor		= status;
-			//opacity				= opac;
 		}
 
 		/// <summary>

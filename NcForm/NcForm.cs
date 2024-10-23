@@ -10,7 +10,8 @@ namespace NcForms
 	/// </summary>
 	public class NcForm:Form
 	{
-		public const int tsItemExtraWidth = 4;
+		public const int tsItemExtraWidth = 3;
+		public const int contentMinHeight = 10;
 
 		private System.ComponentModel.IContainer components;
 		private ToolStripDropDownButton tsMenu;
@@ -26,6 +27,8 @@ namespace NcForms
 		private ToolStripLabel reszLabel;
 
 		Point startDrag, startCur, startResz;
+		DateTime lastMouseDownEventTime;
+		TimeSpan doubleClickDelay;
 		Size startSz, prevSz;
 		bool dragging;
 		bool resizing;
@@ -34,6 +37,8 @@ namespace NcForms
 		Size minTitleSz;
 		bool showTsHelp, showTsMenu, showTsMaxMin, showTsBar, showTsTop;
 		Color colorTitle, colorStatusBar, colorBackground;
+		int availWidthUpper, availWidthLower;
+
 		private ToolStripButton tsMin;
 		private ToolStripButton tsMax;
 		private ToolStripButton tsBar;
@@ -52,14 +57,17 @@ namespace NcForms
 		/// <summary>
 		/// Empty constructor
 		/// </summary>
-		public NcForm() : this(NcFormStyle.Normal, NcFormColor.Normal) { }
+		public NcForm() : this(NcFormStyle.Normal,NcFormColor.Normal) { }
+
+#warning	Aggiungere SizeToContent() !!!
+
 
 		/// <summary>
 		/// Constructor with params.
 		/// NcForm potentially null fields are checked by a try...catch
 		/// </summary>
 		/// <param name="style"></param>		
-		public NcForm(NcFormStyle style, NcFormColor color)        // public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
+		public NcForm(NcFormStyle style,NcFormColor color)        // public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
 		{
 			hasMenu = (style.ncWindowsStyle & NcWindowsStyles.Menu) != 0;
 			hasMinMax = (style.ncWindowsStyle & NcWindowsStyles.MinMax) != 0;
@@ -91,7 +99,8 @@ namespace NcForms
 			StatusBarColor = color.statusBarColor;
 			BackgroundColor = color.backgroundColor;
 			Opacity = color.opacity;
-
+			lastMouseDownEventTime = DateTime.Now;
+			DoubleClickDelay = TimeSpan.FromSeconds(0.3);
 		}
 #pragma warning restore
 
@@ -113,6 +122,7 @@ namespace NcForms
 							this.Size = prevSz;
 							tsStat.Visible = true;
 							tsMin.Visible = tsMax.Visible = true;
+							SetTitleBar();
 							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
 						else if(this.prevNcWindowsState == NcFormWindowStates.Minimized)
@@ -150,7 +160,10 @@ namespace NcForms
 							this.ncWindowsState = NcFormWindowStates.BarOnly;
 							tsStat.Visible = false;
 							tsMin.Visible = tsMax.Visible = false;
-							this.Size = new Size(Size.Width,ts.Height);
+							//this.Size = new Size(Size.Width,ts.Height);
+							this.Size = new Size(Size.Width - int.Min(availWidthUpper,availWidthLower),ts.Height);
+							tsTitle.AutoSize = true;
+							//Invalidate();
 						}
 						break;
 
@@ -187,6 +200,7 @@ namespace NcForms
 			// ts
 			// 
 			ts.BackColor = SystemColors.Control;
+			ts.CanOverflow = false;
 			ts.Items.AddRange(new ToolStripItem[] { tsMenu,tsTop,tsTitle,tsQuit,tsHelp,tsMax,tsMin,tsBar });
 			ts.Location = new Point(0,0);
 			ts.Name = "ts";
@@ -314,6 +328,7 @@ namespace NcForms
 			// 
 			// tsStat
 			// 
+			tsStat.CanOverflow = false;
 			tsStat.Dock = DockStyle.Bottom;
 			tsStat.Items.AddRange(new ToolStripItem[] { statLabel,reszLabel });
 			tsStat.Location = new Point(0,351);
@@ -333,6 +348,7 @@ namespace NcForms
 			// 
 			reszLabel.Alignment = ToolStripItemAlignment.Right;
 			reszLabel.BackColor = SystemColors.ActiveCaption;
+			reszLabel.DisplayStyle = ToolStripItemDisplayStyle.Text;
 			reszLabel.Name = "reszLabel";
 			reszLabel.Size = new Size(23,22);
 			reszLabel.Text = "<>";
@@ -442,8 +458,18 @@ namespace NcForms
 				this.BackColor = colorBackground;
 			}
 		}
-
-
+		/// <summary>
+		/// Title height
+		/// </summary>
+		protected int BarHeight
+		{
+			get { return minTitleSz.Height + tsItemExtraWidth; }
+		}
+		protected TimeSpan DoubleClickDelay
+		{
+			get {return doubleClickDelay;}
+			set {doubleClickDelay = value;}
+		}
 		private void SetTitleBar(string? txt = null)
 		{
 			showTsMenu = hasMenu;               // Usa i flag del costruttore
@@ -461,24 +487,61 @@ namespace NcForms
 			if(txt != null) tsTitle.Text = txt;
 			tsTitle.AutoSize = true;
 			minTitleSz = tsTitle.Size;
-			tsTitle.AutoSize = false;
 
-			int availWidth = this.Width
+			availWidthUpper = this.Width
 								- (showTsMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
 								- (showTsHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
 								- (showTsTop ? tsTop.Width + tsItemExtraWidth : tsItemExtraWidth)
 								- (showTsMaxMin ? tsMax.Width + tsMin.Width + tsBar.Width + 3 * tsItemExtraWidth : 3 * tsItemExtraWidth)
 								- (tsQuit.Width + tsItemExtraWidth);
+			availWidthLower = this.Width - statLabel.Width - reszLabel.Width;
 
-			if(availWidth < minTitleSz.Width)
+			if(availWidthUpper < minTitleSz.Width)
 			{
 				tsTitle.Visible = false;
 			}
 			else
 			{
+				tsTitle.AutoSize = false;
 				tsTitle.Visible = true;
 				tsTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-				tsTitle.Size = new Size(availWidth,minTitleSz.Height);
+				tsTitle.Size = new Size(availWidthUpper,minTitleSz.Height);
+			}
+		}
+
+		private void AdjustWidth()
+		{
+			bool resize = false;
+			Size newsize = this.Size;
+
+			int minWidth = this.Width - int.Min(availWidthUpper,availWidthLower);
+			int minHeight = ts.Height + tsStat.Height + contentMinHeight;
+
+			if(Size.Width < minWidth)
+			{
+				newsize.Width = minWidth;
+				resize = true;
+			}
+			if(Size.Height < minHeight)
+			{
+				newsize.Height = minHeight;
+				resize = true;
+			}
+			if(resize)
+			{
+				this.Size = newsize;
+			}
+
+		}
+		private void SwitchBarOnly()
+		{
+			if(NcWindowsState == NcFormWindowStates.Normal)
+			{
+				NcWindowsState = NcFormWindowStates.BarOnly;
+			}
+			else if(NcWindowsState == NcFormWindowStates.BarOnly)
+			{
+				NcWindowsState = NcFormWindowStates.Normal;
 			}
 		}
 		private void SetEnterLeaveForControls(Control control,EventHandler eVmouseEnter,EventHandler eVmouseLeave)
@@ -546,7 +609,6 @@ namespace NcForms
 		private void ts_MouseDown(object sender,MouseEventArgs e)
 		{
 			Mouse_Down(sender,e);
-
 		}
 		private void ts_MouseUp(object sender,MouseEventArgs e)
 		{
@@ -562,6 +624,13 @@ namespace NcForms
 		}
 		private void Mouse_Down(object sender,MouseEventArgs e)
 		{
+			DateTime dateTime = DateTime.Now;
+			if(dateTime - lastMouseDownEventTime < doubleClickDelay)
+			{
+				tsBar_DoubleClick();
+				return;
+			}
+			lastMouseDownEventTime = dateTime;
 			if((NcWindowsState == NcFormWindowStates.Normal) || (NcWindowsState == NcFormWindowStates.BarOnly))
 			{
 				startDrag = this.Location;
@@ -636,6 +705,7 @@ namespace NcForms
 		private void NcForm_ResizeEnd(object sender,EventArgs e)
 		{
 			SetTitleBar();
+			AdjustWidth();
 		}
 		private void tsMin_Click(object sender,EventArgs e)
 		{
@@ -654,14 +724,7 @@ namespace NcForms
 		}
 		private void tsBar_Click(object sender,EventArgs e)
 		{
-			if(NcWindowsState == NcFormWindowStates.Normal)
-			{
-				NcWindowsState = NcFormWindowStates.BarOnly;
-			}
-			else if(NcWindowsState == NcFormWindowStates.BarOnly)
-			{
-				NcWindowsState = NcFormWindowStates.Normal;
-			}
+			SwitchBarOnly();
 		}
 		/// <summary>
 		/// Called when the form is restore after having been minimized
@@ -688,6 +751,10 @@ namespace NcForms
 		{
 			SetupControls(this);
 			NcWindowsState = ncWindowsState;
+		}
+		private void tsBar_DoubleClick()
+		{
+			SwitchBarOnly();
 		}
 	}
 
