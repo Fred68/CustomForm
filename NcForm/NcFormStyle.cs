@@ -41,14 +41,25 @@
 		BarOnly = 3
 	}
 
+
 	/// <summary>
 	/// NcFormStyle class
 	/// with static members
 	/// </summary>
 	public class NcFormStyle
 	{
+		/// <summary>
+		/// Form style
+		/// </summary>
 		public NcWindowsStyles		ncWindowsStyle;
+		/// <summary>
+		/// Form window state
+		/// </summary>
 		public NcFormWindowStates	ncFormWindowState;
+		/// <summary>
+		/// Default double click time interval on upper bar
+		/// </summary>
+		public static double		dblClkOnBarSeconds = 0.3;
 
 		public NcFormStyle(	NcWindowsStyles ncwStyle, NcFormWindowStates ncfwState/*, Color bkgnd, Color title, Color status, float opac*/)
 		{

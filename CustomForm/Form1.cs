@@ -7,10 +7,7 @@ namespace CustomForm
 
 		public Form1(NcFormStyle style, NcFormColor color) : base(style, color)
 		{
-
 			InitializeComponent();
-			
-			//SetupControls(this);
 		}
 
 		private void button1_Click(object sender,EventArgs e)
@@ -22,6 +19,13 @@ namespace CustomForm
 			Title = "Pippo";
 			StatusText = "OK";
 			Opacity = 0.1f;
+			SizeToContent();
+			AskClose = false;
+		}
+
+		public override void OnHelp()
+		{
+			MessageBox.Show("New help");
 		}
 	}
 }

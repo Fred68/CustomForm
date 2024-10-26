@@ -1,4 +1,7 @@
-﻿using System.Windows.Forms.VisualStyles;
+﻿using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace NcForms
@@ -10,6 +13,11 @@ namespace NcForms
 	/// </summary>
 	public class NcForm:Form
 	{
+		/************************/
+		// Private members
+		/************************/
+		#region Private members
+
 		public const int tsItemExtraWidth = 3;
 		public const int contentMinHeight = 10;
 
@@ -28,7 +36,7 @@ namespace NcForms
 
 		Point startDrag, startCur, startResz;
 		DateTime lastMouseDownEventTime;
-		TimeSpan doubleClickDelay;
+		TimeSpan doubleClickDelay;			// Timespan identifying a double click on upper bar
 		Size startSz, prevSz;
 		bool dragging;
 		bool resizing;
@@ -43,6 +51,8 @@ namespace NcForms
 		private ToolStripButton tsMax;
 		private ToolStripButton tsBar;
 		private ToolStripButton tsTop;
+		
+		private List<string> baseFormControlNames;
 
 		bool hasMenu;
 		bool hasMinMax;
@@ -50,31 +60,36 @@ namespace NcForms
 		bool isResizable;
 		bool hasTopMost;
 
+		bool askClose, closing;
+
 		NcFormWindowStates ncWindowsState, prevNcWindowsState;
 
-#pragma warning disable CS8618
+		#endregion
+		/************************/
 
+		/************************/
+		// Constructors
+		/************************/
+#pragma warning disable CS8618
 		/// <summary>
 		/// Empty constructor
 		/// </summary>
 		public NcForm() : this(NcFormStyle.Normal,NcFormColor.Normal) { }
-
-#warning	Aggiungere SizeToContent() !!!
-
 
 		/// <summary>
 		/// Constructor with params.
 		/// NcForm potentially null fields are checked by a try...catch
 		/// </summary>
 		/// <param name="style"></param>		
-		public NcForm(NcFormStyle style,NcFormColor color)        // public NcForm(NcWindowsStyles style = NcWindowsStyles.All)
+		public NcForm(NcFormStyle style,NcFormColor color)
 		{
+			askClose = closing = false;		// No asking on close event until form loading is complete
 			hasMenu = (style.ncWindowsStyle & NcWindowsStyles.Menu) != 0;
 			hasMinMax = (style.ncWindowsStyle & NcWindowsStyles.MinMax) != 0;
 			hasHelp = (style.ncWindowsStyle & NcWindowsStyles.Help) != 0;
 			isResizable = (style.ncWindowsStyle & NcWindowsStyles.Resizable) != 0;
 			hasTopMost = (style.ncWindowsStyle & NcWindowsStyles.TopMost) != 0;
-
+			
 			try
 			{
 				InitializeComponent();
@@ -100,10 +115,19 @@ namespace NcForms
 			BackgroundColor = color.backgroundColor;
 			Opacity = color.opacity;
 			lastMouseDownEventTime = DateTime.Now;
-			DoubleClickDelay = TimeSpan.FromSeconds(0.3);
+			DblClickDelaySeconds = NcFormStyle.dblClkOnBarSeconds;
+			baseFormControlNames = new List<string>();
+			foreach (Control control in this.Controls)
+			{
+				baseFormControlNames.Add(control.Name);		// Controlli della classe base NcForm
+			}
 		}
 #pragma warning restore
+		/************************/
 
+		/************************/
+		// Protected functions
+		/************************/
 		/// <summary>
 		/// Set/Get WindowsState: Minimized, Maximized, Normal, BarOnly
 		/// </summary>
@@ -174,7 +198,222 @@ namespace NcForms
 			}
 
 		}
+		/// <summary>
+		/// Set-up form controls' handlers
+		/// </summary>
+		/// <param name="control"></param>
+		protected void SetupControls(Control control)
+		{
+			SetEnterLeaveForControls(control,eMouseEnter,eMouseLeave);
+			SetEnterLeaveForSingleControl(ts,eMouseEnter,eMouseLeave,etsMouseEnter,etsMouseLeave);
+			SetMouseMoveSingleControl(ts,Mouse_Move);
+			SetTitleBar();
 
+		}
+		protected bool IsBaseControl(Control control)
+		{
+			return baseFormControlNames.Contains(control.Name);
+		}
+		protected string GetControlNames()
+		{	
+			StringBuilder sb = new StringBuilder();
+			foreach (Control control in this.Controls)
+			{
+				sb.AppendLine(control.Name);
+			}
+			return sb.ToString();
+		}
+		/// <summary>
+		/// Text on the status bar
+		/// </summary>
+		protected string StatusText
+		{
+			get { return statLabel.Text; }
+			set { statLabel.Text = value; }
+		}
+		/// <summary>
+		/// Title text
+		/// </summary>
+		protected string Title
+		{
+			get { return tsTitle.Text; }
+			set
+			{
+				SetTitleBar(value);
+			}
+		}
+		/// <summary>
+		/// Opacity
+		/// </summary>
+		protected new float Opacity
+		{
+			get { return opacity; }
+			set
+			{
+				opacity = value;
+				base.Opacity = opacity;
+			}
+		}
+		/// <summary>
+		/// Title bar color
+		/// </summary>
+		protected Color TitleColor
+		{
+			get { return colorTitle; }
+			set
+			{
+				colorTitle = value;
+				ts.BackColor = colorTitle;
+			}
+		}
+		/// <summary>
+		/// Status bar color
+		/// </summary>
+		protected Color StatusBarColor
+		{
+			get { return colorStatusBar; }
+			set
+			{
+				colorStatusBar = value;
+				tsStat.BackColor = colorStatusBar;
+			}
+		}
+		/// <summary>
+		/// Background color
+		/// </summary>
+		protected Color BackgroundColor
+		{
+			get { return colorBackground; }
+			set
+			{
+				colorBackground = value;
+				this.BackColor = colorBackground;
+			}
+		}
+		/// <summary>
+		/// Title height
+		/// </summary>
+		protected int BarHeight
+		{
+			get { return minTitleSz.Height + tsItemExtraWidth; }
+		}
+		/// <summary>
+		/// TimeSpan to identify a double click on upper toolbar
+		/// Default DoubleClickDelay = TimeSpan.FromSeconds(0.3);
+		/// </summary>
+		protected double DblClickDelaySeconds
+		{
+			get {return doubleClickDelay.TotalSeconds;}
+			set {doubleClickDelay = TimeSpan.FromSeconds(value);}
+		}
+		protected bool AskClose
+		{
+			get {return askClose;}
+			set {askClose = value;}
+		}
+		protected void SizeToContent()
+		{
+			StringBuilder sb = new StringBuilder();
+			Point pmin = new Point(int.MaxValue, int.MaxValue);
+			Point pmax = new Point(int.MinValue, int.MinValue);
+			bool xmin,xmax,ymin,ymax;
+			xmin=xmax=ymin=ymax=false;
+			foreach(Control control in this.Controls)
+			{
+				if(!IsBaseControl(control))
+				{
+					if(control.Dock == DockStyle.None)
+					{
+						if(control.Left < pmin.X) {pmin.X = control.Left; xmin = true;}
+						if(control.Top < pmin.Y) {pmin.Y = control.Top; ymin = true;}
+						if(control.Right > pmax.X) {pmax.X = control.Right; xmax = true;}
+						if(control.Bottom > pmax.Y) {pmax.Y = control.Bottom; ymax = true;}
+
+						//sb.AppendLine($"{control.Name} top={control.Top} left={control.Left} bottom={control.Bottom} right={control.Right}");
+					}
+				}
+
+			}
+			//MessageBox.Show(sb.ToString(),"Derived class controls");
+			if(xmin && xmax && ymin && ymax)
+			{
+				Size newsize = new Size(pmax.X,pmax.Y + tsStat.Height);
+				SetTitleBar();
+				GetAdjustedSize(ref newsize);
+				this.Size = newsize;
+				ncWindowsState = NcFormWindowStates.Normal;
+			}
+		}
+		/************************/
+
+		/**************************************/
+		// Virtual functions (to be oberridden)
+		/**************************************/
+		public virtual void OnHelp()
+		{
+			MessageBox.Show("Base OnHelp");
+		}
+
+		public virtual bool OnClosingCancelEvent()
+		{
+			bool cancel = false;
+			if(MessageBox.Show("Quit","Quit ?",MessageBoxButtons.YesNo) != DialogResult.Yes)
+			{
+				cancel = true;	
+			}
+			return cancel;
+		}
+
+		/************************/
+
+		/*********************************/
+		// Private functions and handlers
+		/*********************************/
+		#region Private functions and handlers
+		private void NcForm_Load(object sender,EventArgs e)
+		{
+			SetupControls(this);		// Executed on derived class controls, not only base class controls.
+			NcWindowsState = ncWindowsState;
+			askClose = true;
+		}
+		private void SetTitleBar(string? txt = null)
+		{
+			showTsMenu = hasMenu;               // Usa i flag del costruttore
+			showTsHelp = hasHelp;
+			showTsMaxMin = hasMinMax;
+			showTsTop = hasTopMost;
+
+			// Imposta visibilità
+			reszLabel.Visible = isResizable;    // Usa il flag del costruttore
+			tsMenu.Visible = showTsMenu;
+			tsHelp.Visible = tsmiHelp.Visible = showTsHelp;
+			tsMax.Visible = tsMin.Visible = tsBar.Visible = showTsMaxMin;
+			tsTop.Visible = showTsTop;
+
+			if(txt != null) tsTitle.Text = txt;
+			tsTitle.AutoSize = true;
+			minTitleSz = tsTitle.Size;
+
+			availWidthUpper = this.Width
+								- (showTsMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
+								- (showTsHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
+								- (showTsTop ? tsTop.Width + tsItemExtraWidth : tsItemExtraWidth)
+								- (showTsMaxMin ? tsMax.Width + tsMin.Width + tsBar.Width + 3 * tsItemExtraWidth : 3 * tsItemExtraWidth)
+								- (tsQuit.Width + tsItemExtraWidth);
+			availWidthLower = this.Width - statLabel.Width - reszLabel.Width;
+
+			if(availWidthUpper < minTitleSz.Width)
+			{
+				tsTitle.Visible = false;
+			}
+			else
+			{
+				tsTitle.AutoSize = false;
+				tsTitle.Visible = true;
+				tsTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+				tsTitle.Size = new Size(availWidthUpper,minTitleSz.Height);
+			}
+		}
 		private void InitializeComponent()
 		{
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NcForm));
@@ -224,21 +463,21 @@ namespace NcForms
 			// settingsToolStripMenuItem
 			// 
 			settingsToolStripMenuItem.Name = "settingsToolStripMenuItem";
-			settingsToolStripMenuItem.Size = new Size(116,22);
+			settingsToolStripMenuItem.Size = new Size(180,22);
 			settingsToolStripMenuItem.Text = "Settings";
 			settingsToolStripMenuItem.Click += settingsToolStripMenuItem_Click;
 			// 
 			// tsmiHelp
 			// 
 			tsmiHelp.Name = "tsmiHelp";
-			tsmiHelp.Size = new Size(116,22);
-			tsmiHelp.Text = "Help";
+			tsmiHelp.Size = new Size(180,22);
+			tsmiHelp.Text = "OnHelp";
 			tsmiHelp.Click += tsHelp_Click;
 			// 
 			// tsmiQuit
 			// 
 			tsmiQuit.Name = "tsmiQuit";
-			tsmiQuit.Size = new Size(116,22);
+			tsmiQuit.Size = new Size(180,22);
 			tsmiQuit.Text = "Quit";
 			tsmiQuit.Click += tsmiQuit_Click;
 			// 
@@ -284,7 +523,7 @@ namespace NcForms
 			tsHelp.RightToLeft = RightToLeft.No;
 			tsHelp.Size = new Size(23,22);
 			tsHelp.Text = "?";
-			tsHelp.ToolTipText = "Help";
+			tsHelp.ToolTipText = "OnHelp";
 			tsHelp.Click += tsHelp_Click;
 			// 
 			// tsMax
@@ -378,160 +617,35 @@ namespace NcForms
 			ResumeLayout(false);
 			PerformLayout();
 		}
-
-		/// <summary>
-		/// Function to be called at the end of the derived class constructor
-		/// </summary>
-		/// <param name="control"></param>
-		protected void SetupControls(Control control)
-		{
-			SetEnterLeaveForControls(control,eMouseEnter,eMouseLeave);
-			SetEnterLeaveForSingleControl(ts,eMouseEnter,eMouseLeave,etsMouseEnter,etsMouseLeave);
-			SetMouseMoveSingleControl(ts,Mouse_Move);
-			SetTitleBar();
-
-		}
-		/// <summary>
-		/// Text on the status bar
-		/// </summary>
-		protected string StatusText
-		{
-			get { return statLabel.Text; }
-			set { statLabel.Text = value; }
-		}
-		/// <summary>
-		/// Title text
-		/// </summary>
-		protected string Title
-		{
-			get { return tsTitle.Text; }
-			set
-			{
-				SetTitleBar(value);
-			}
-		}
-		/// <summary>
-		/// Opacity
-		/// </summary>
-		protected new float Opacity
-		{
-			get { return opacity; }
-			set
-			{
-				opacity = value;
-				base.Opacity = opacity;
-			}
-		}
-		/// <summary>
-		/// Title bar color
-		/// </summary>
-		protected Color TitleColor
-		{
-			get { return colorTitle; }
-			set
-			{
-				colorTitle = value;
-				ts.BackColor = colorTitle;
-			}
-		}
-		/// <summary>
-		/// Status bar color
-		/// </summary>
-		protected Color StatusBarColor
-		{
-			get { return colorStatusBar; }
-			set
-			{
-				colorStatusBar = value;
-				tsStat.BackColor = colorStatusBar;
-			}
-		}
-		/// <summary>
-		/// Background color
-		/// </summary>
-		protected Color BackgroundColor
-		{
-			get { return colorBackground; }
-			set
-			{
-				colorBackground = value;
-				this.BackColor = colorBackground;
-			}
-		}
-		/// <summary>
-		/// Title height
-		/// </summary>
-		protected int BarHeight
-		{
-			get { return minTitleSz.Height + tsItemExtraWidth; }
-		}
-		protected TimeSpan DoubleClickDelay
-		{
-			get {return doubleClickDelay;}
-			set {doubleClickDelay = value;}
-		}
-		private void SetTitleBar(string? txt = null)
-		{
-			showTsMenu = hasMenu;               // Usa i flag del costruttore
-			showTsHelp = hasHelp;
-			showTsMaxMin = hasMinMax;
-			showTsTop = hasTopMost;
-
-			// Imposta visibilità
-			reszLabel.Visible = isResizable;    // Usa il flag del costruttore
-			tsMenu.Visible = showTsMenu;
-			tsHelp.Visible = tsmiHelp.Visible = showTsHelp;
-			tsMax.Visible = tsMin.Visible = tsBar.Visible = showTsMaxMin;
-			tsTop.Visible = showTsTop;
-
-			if(txt != null) tsTitle.Text = txt;
-			tsTitle.AutoSize = true;
-			minTitleSz = tsTitle.Size;
-
-			availWidthUpper = this.Width
-								- (showTsMenu ? tsMenu.Width + tsItemExtraWidth : tsItemExtraWidth)
-								- (showTsHelp ? tsHelp.Width + tsItemExtraWidth : tsItemExtraWidth)
-								- (showTsTop ? tsTop.Width + tsItemExtraWidth : tsItemExtraWidth)
-								- (showTsMaxMin ? tsMax.Width + tsMin.Width + tsBar.Width + 3 * tsItemExtraWidth : 3 * tsItemExtraWidth)
-								- (tsQuit.Width + tsItemExtraWidth);
-			availWidthLower = this.Width - statLabel.Width - reszLabel.Width;
-
-			if(availWidthUpper < minTitleSz.Width)
-			{
-				tsTitle.Visible = false;
-			}
-			else
-			{
-				tsTitle.AutoSize = false;
-				tsTitle.Visible = true;
-				tsTitle.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-				tsTitle.Size = new Size(availWidthUpper,minTitleSz.Height);
-			}
-		}
-
-		private void AdjustWidth()
+		protected bool GetAdjustedSize(ref Size size)
 		{
 			bool resize = false;
-			Size newsize = this.Size;
-
+			Size newsize = size;
+			
 			int minWidth = this.Width - int.Min(availWidthUpper,availWidthLower);
 			int minHeight = ts.Height + tsStat.Height + contentMinHeight;
 
-			if(Size.Width < minWidth)
+			if(size.Width < minWidth)
 			{
 				newsize.Width = minWidth;
 				resize = true;
 			}
-			if(Size.Height < minHeight)
+			if(size.Height < minHeight)
 			{
 				newsize.Height = minHeight;
 				resize = true;
 			}
-			if(resize)
+
+			if(resize)		size = newsize;
+			return resize;
+		}
+		private void AdjustSize()
+		{
+			Size newsize = this.Size;
+			if(GetAdjustedSize(ref newsize))
 			{
 				this.Size = newsize;
 			}
-
 		}
 		private void SwitchBarOnly()
 		{
@@ -551,6 +665,16 @@ namespace NcForms
 				childControl.MouseEnter += eVmouseEnter;
 				childControl.MouseLeave += eVmouseLeave;
 				SetEnterLeaveForControls(childControl,eVmouseEnter,eVmouseLeave);
+			}
+
+		}
+		private void ClearEnterLeaveForControls(Control control,EventHandler eVmouseEnter,EventHandler eVmouseLeave)
+		{
+			foreach(Control childControl in control.Controls)
+			{
+				childControl.MouseEnter -= eVmouseEnter;
+				childControl.MouseLeave -= eVmouseLeave;
+				ClearEnterLeaveForControls(childControl,eVmouseEnter,eVmouseLeave);
 			}
 
 		}
@@ -582,18 +706,32 @@ namespace NcForms
 		}
 		private void NcForm_FormClosing(object sender,FormClosingEventArgs e)
 		{
-			if(MessageBox.Show("Quit","Quit ?",MessageBoxButtons.YesNo) != DialogResult.Yes)
+			closing = true;
+			if(askClose)
 			{
-				e.Cancel = true;
+				if(OnClosingCancelEvent())
+				{
+					e.Cancel = true;
+					closing = false;
+				}
 			}
 		}
 		private void eMouseEnter(object sender,EventArgs e)
 		{
 			base.Opacity = 1f;
 		}
+		/// <summary>
+		/// MouseLeave handler.
+		/// If closing, no action is performed (the control might have been destroyed)
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void eMouseLeave(object sender,EventArgs e)
 		{
-			base.Opacity = Opacity;
+			if(!closing)
+			{
+				base.Opacity = Opacity;
+			}
 		}
 		private void etsMouseEnter(object sender,EventArgs e)
 		{
@@ -705,7 +843,7 @@ namespace NcForms
 		private void NcForm_ResizeEnd(object sender,EventArgs e)
 		{
 			SetTitleBar();
-			AdjustWidth();
+			AdjustSize();
 		}
 		private void tsMin_Click(object sender,EventArgs e)
 		{
@@ -745,17 +883,16 @@ namespace NcForms
 		}
 		private void tsHelp_Click(object sender,EventArgs e)
 		{
-			MessageBox.Show("Help");
+			OnHelp();		// Chiama la funzione virtuale (che può subire l'override)
 		}
-		private void NcForm_Load(object sender,EventArgs e)
-		{
-			SetupControls(this);
-			NcWindowsState = ncWindowsState;
-		}
+		
 		private void tsBar_DoubleClick()
 		{
 			SwitchBarOnly();
 		}
+		#endregion
+		/************************/
+
 	}
 
 }
