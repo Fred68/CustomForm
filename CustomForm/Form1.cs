@@ -9,6 +9,7 @@ namespace CustomForm
 		public Form1(NcFormStyle style,NcFormColor color) : base(style,color)
 		{
 			InitializeComponent();
+		
 		}
 
 		private void button1_Click(object sender,EventArgs e)
@@ -33,6 +34,7 @@ namespace CustomForm
 		private void Form1_Load(object sender,EventArgs e)
 		{
 			AskClose = false;
+				Opacity = 0.2f;
 		}
 	}
 }

@@ -296,8 +296,11 @@ namespace NcForms
 		/// </summary>
 		protected bool AskClose
 		{
-			get {return askClose;}
-			set {askClose = value;}
+			get {	return askClose;	}
+			set {
+					askClose = value;
+					tsQuit.ToolTipText = askClose ? "Close" : "Close immediately";
+				}
 		}
 		/// <summary>
 		/// Resize form to content
@@ -571,7 +574,7 @@ namespace NcForms
 			// 
 			tsmiHelp.Name = "tsmiHelp";
 			tsmiHelp.Size = new Size(116,22);
-			tsmiHelp.Text = "OnHelp";
+			tsmiHelp.Text = "Help";
 			tsmiHelp.Click += tsHelp_Click;
 			// 
 			// tsmiQuit
