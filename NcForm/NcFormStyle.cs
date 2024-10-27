@@ -86,7 +86,7 @@
 		/// <summary>
 		/// Normal with everything
 		/// </summary>
-		public static NcFormStyle Normal = new NcFormStyle(NcWindowsStyles.All, NcFormWindowStates.Normal, new Font("Arial",20));
+		public static NcFormStyle Normal = new NcFormStyle(NcWindowsStyles.All, NcFormWindowStates.Normal);
 		/// <summary>
 		/// Simple with menu and min/max buttons
 		/// </summary>
