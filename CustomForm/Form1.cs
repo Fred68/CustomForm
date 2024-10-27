@@ -1,4 +1,5 @@
 using NcForms;
+using System.Reflection;
 
 namespace CustomForm
 {
@@ -20,13 +21,13 @@ namespace CustomForm
 			StatusText = "OK";
 			Opacity = 0.1f;
 			ResizeToContent(20,10);
-			//AskClose = false;
 			SetBarFont(new Font("Courier New",12),NcBars.All);
 		}
 
-		public override void OnHelp()
+		protected override void OnHelp()
 		{
-			MessageBox.Show("New help");
+			base.OnHelp();
+			MessageBox.Show(Version(Assembly.GetExecutingAssembly()));
 		}
 
 		private void Form1_Load(object sender,EventArgs e)

@@ -6,6 +6,11 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Title>Custom Form</Title>
+    <Authors>FcSoft</Authors>
+    <Company>FcSoft</Company>
+    <Product>Custom Form</Product>
+    <Copyright>FcSoft</Copyright>
   </PropertyGroup>
 
   <ItemGroup>

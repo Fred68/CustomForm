@@ -1,4 +1,6 @@
-﻿using System.Drawing;
+﻿using NcForm.Properties;
+using System.Drawing;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -360,9 +362,54 @@ namespace NcForms
 				f = tsLower.Font;
 			}
 			return f;
+		}		
+		/// <summary>
+		/// Version string
+		/// </summary>
+		/// <param name="execAssy">from Assembly.GetExecutingAssembly()</param>
+		/// <returns></returns>
+		protected string Version(Assembly asm)
+		{
+			StringBuilder strb = new StringBuilder();
+			try
+			{
+				if(asm != null)
+				{
+					System.Version? v = asm.GetName().Version;
+					if(v != null) strb.AppendLine($"Version: {v.ToString()} ({BuildTime(asm)})");
+					string? n = asm.GetName().Name;
+					if(n != null) strb.AppendLine("Assembly name: " + n);
+					strb.AppendLine("BuildTime time: "+ File.GetCreationTime(asm.Location).ToString());
+					strb.AppendLine("BuildTime number: " + BuildTime(asm,true));
+				}
+				strb.AppendLine("Product name: " + Application.ProductName);
+				strb.AppendLine("Copyright: " + Application.CompanyName);
+				strb.AppendLine("Executable path: " + Application.ExecutablePath);
+			}
+			catch
+			{
+				MessageBox.Show("Error in Version()");
+			}
+			return strb.ToString();
 		}
-		
-
+		/// <summary>
+		/// Build string
+		/// </summary>
+		/// <param name="asm"></param>
+		/// <returns></returns>
+		protected string BuildTime(Assembly asm, bool number = false)
+		{
+			StringBuilder strb = new StringBuilder();
+			if(asm != null)
+			{
+				DateTime dt = File.GetCreationTime(asm.Location);
+				if(number)
+					strb.Append(String.Format("{0:yyMMddhh}.{0:mmss}",dt));
+				else
+					strb.Append(dt.ToString("D"));
+			}	
+			return strb.ToString();
+		}
 		/// <summary>
 		/// Move controls
 		/// </summary>
@@ -397,16 +444,16 @@ namespace NcForms
 		/// <summary>
 		/// Help function
 		/// </summary>
-		public virtual void OnHelp()
+		protected virtual void OnHelp()
 		{
-			MessageBox.Show("Base OnHelp");
+			MessageBox.Show(Version(Assembly.GetExecutingAssembly()));
 		}
 
 		/// <summary>
 		/// Ask confirmation onFormClosing event
 		/// </summary>
 		/// <returns>true to cancel event</returns>
-		public virtual bool OnClosingCancelEvent()
+		protected virtual bool OnClosingCancelEvent()
 		{
 			bool cancel = false;
 			if(MessageBox.Show("Quit","Quit ?",MessageBoxButtons.YesNo) != DialogResult.Yes)
