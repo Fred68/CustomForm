@@ -334,11 +334,11 @@ namespace NcForms
 			}
 		}
 		/// <summary>
-		/// Change bar font
+		/// Set bar font
 		/// </summary>
 		/// <param name="font"></param>
 		/// <param name="ncbar"></param>
-		protected void ChangeBarFont(Font font, NcBars ncbar)
+		protected void SetBarFont(Font font, NcBars ncbar)
 		{
 			int oldHgt = tsUpper.Height;
 			if( (ncbar & NcBars.Upper) != 0 )		tsUpper.Font = font;
@@ -346,6 +346,26 @@ namespace NcForms
 			minTitleSz = tsTitle.Size;
 			MoveControls(0, tsUpper.Height - oldHgt);
 		}
+		/// <summary>
+		/// Return bar font (or null, if not specified)
+		/// </summary>
+		/// <param name="ncbar"></param>
+		/// <returns></returns>
+		protected Font GetBarFont(NcBars ncbar)
+		{
+			Font f = null;
+			if(ncbar == NcBars.Upper)		
+			{
+				f = tsUpper.Font;
+			}
+			else if (ncbar == NcBars.Lower)
+			{
+				f = tsLower.Font;
+			}
+			return f;
+		}
+		
+
 		/// <summary>
 		/// Move controls
 		/// </summary>
@@ -409,7 +429,7 @@ namespace NcForms
 		{
 			SetupControls(this);		// Executed on derived class controls, not only base class controls.
 			NcWindowsState = ncWindowsState;
-			ChangeBarFont(ncStyle.barsFont,NcBars.All);
+			SetBarFont(ncStyle.barsFont,NcBars.All);
 			askClose = true;
 		}
 		private void SetTitleBar(string? txt = null)

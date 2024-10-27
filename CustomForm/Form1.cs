@@ -21,7 +21,7 @@ namespace CustomForm
 			Opacity = 0.1f;
 			ResizeToContent(20,10);
 			AskClose = false;
-			ChangeBarFont(new Font("Courier New",12),NcBars.All);
+			SetBarFont(new Font("Courier New",12),NcBars.All);
 		}
 
 		public override void OnHelp()

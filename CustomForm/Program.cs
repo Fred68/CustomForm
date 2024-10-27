@@ -11,7 +11,7 @@ namespace CustomForm
 			// To customize application configuration such as set high DPI settings or default font,
 			// see https://aka.ms/applicationconfiguration.
 			ApplicationConfiguration.Initialize();
-			Application.Run(new Form1(NcForms.NcFormStyle.Normal,NcForms.NcFormColor.Normal));
+			Application.Run(new Form1(NcForms.NcFormStyle.Fixed,NcForms.NcFormColor.Normal));
 		}
 	}
 }
