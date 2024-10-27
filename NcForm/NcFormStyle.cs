@@ -41,7 +41,15 @@
 		BarOnly = 3
 	}
 
-
+	[Flags]
+	public enum NcBars
+	{
+		None		= 0,
+		Upper		= 1 << 0,
+		Lower		= 1 << 1,
+		All			= -1
+	}
+	
 	/// <summary>
 	/// NcFormStyle class
 	/// with static members
@@ -57,22 +65,36 @@
 		/// </summary>
 		public NcFormWindowStates	ncFormWindowState;
 		/// <summary>
-		/// Default double click time interval on upper bar
+		/// Bars font
 		/// </summary>
-		public static double		dblClkOnBarSeconds = 0.3;
+		public Font					barsFont;
+		
 
-		public NcFormStyle(	NcWindowsStyles ncwStyle, NcFormWindowStates ncfwState/*, Color bkgnd, Color title, Color status, float opac*/)
+		public NcFormStyle(	NcWindowsStyles ncwStyle, NcFormWindowStates ncfwState, Font barFont)
 		{
 			ncWindowsStyle		= ncwStyle;
 			ncFormWindowState	= ncfwState;
+			barsFont			= barFont;
 		}
+		public NcFormStyle(	NcWindowsStyles ncwStyle, NcFormWindowStates ncfwState) : this(ncwStyle, ncfwState, SystemFonts.DefaultFont){}
 
+
+		/// <summary>
+		/// Default double clict time on toolbars
+		/// </summary>
+		public static double		dblclkOnBarSecondsDefault = 0.3;
 		/// <summary>
 		/// Normal with everything
 		/// </summary>
-		public static NcFormStyle Normal = new NcFormStyle(NcWindowsStyles.All, NcFormWindowStates.Normal/*, Color.White, Color.White, Color.White,0.5f*/);
-		public static NcFormStyle Simple = new NcFormStyle(NcWindowsStyles.Menu | NcWindowsStyles.MinMax | NcWindowsStyles.Resizable, NcFormWindowStates.Normal/*, Color.White, Color.White, Color.White,0.9f*/);
-		public static NcFormStyle Fixed = new NcFormStyle(NcWindowsStyles.Help | NcWindowsStyles.TopMost, NcFormWindowStates.Normal/*, Color.White, Color.White, Color.White,0.7f*/);
+		public static NcFormStyle Normal = new NcFormStyle(NcWindowsStyles.All, NcFormWindowStates.Normal, new Font("Arial",20));
+		/// <summary>
+		/// Simple with menu and min/max buttons
+		/// </summary>
+		public static NcFormStyle Simple = new NcFormStyle(NcWindowsStyles.Menu | NcWindowsStyles.MinMax | NcWindowsStyles.Resizable, NcFormWindowStates.Normal);
+		/// <summary>
+		/// Fixed with only help, not resizable
+		/// </summary>
+		public static NcFormStyle Fixed = new NcFormStyle(NcWindowsStyles.Help | NcWindowsStyles.TopMost, NcFormWindowStates.Normal);
 		
 	}
 

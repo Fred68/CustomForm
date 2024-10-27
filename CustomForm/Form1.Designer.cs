@@ -33,6 +33,7 @@
 			toolStripButton1 = new ToolStripButton();
 			button1 = new Button();
 			label1 = new Label();
+			label2 = new Label();
 			toolStrip1.SuspendLayout();
 			SuspendLayout();
 			// 
@@ -41,7 +42,7 @@
 			toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1 });
 			toolStrip1.Location = new Point(0,25);
 			toolStrip1.Name = "toolStrip1";
-			toolStrip1.Size = new Size(529,25);
+			toolStrip1.Size = new Size(480,25);
 			toolStrip1.TabIndex = 1;
 			toolStrip1.Text = "toolStrip1";
 			// 
@@ -73,12 +74,22 @@
 			label1.TabIndex = 3;
 			label1.Text = "label1";
 			// 
+			// label2
+			// 
+			label2.AutoSize = true;
+			label2.Location = new Point(272,215);
+			label2.Name = "label2";
+			label2.Size = new Size(38,15);
+			label2.TabIndex = 4;
+			label2.Text = "label2";
+			// 
 			// Form1
 			// 
 			AutoScaleDimensions = new SizeF(7F,15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = SystemColors.Control;
-			ClientSize = new Size(529,361);
+			ClientSize = new Size(480,321);
+			Controls.Add(label2);
 			Controls.Add(label1);
 			Controls.Add(button1);
 			Controls.Add(toolStrip1);
@@ -87,6 +98,7 @@
 			Controls.SetChildIndex(toolStrip1,0);
 			Controls.SetChildIndex(button1,0);
 			Controls.SetChildIndex(label1,0);
+			Controls.SetChildIndex(label2,0);
 			toolStrip1.ResumeLayout(false);
 			toolStrip1.PerformLayout();
 			ResumeLayout(false);
@@ -99,5 +111,6 @@
 		private Button button1;
 		private ToolStripButton toolStripButton1;
 		private Label label1;
+		private Label label2;
 	}
 }

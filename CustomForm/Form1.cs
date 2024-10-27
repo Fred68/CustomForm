@@ -19,8 +19,9 @@ namespace CustomForm
 			Title = "Pippo";
 			StatusText = "OK";
 			Opacity = 0.1f;
-			SizeToContent();
+			ResizeToContent(20,10);
 			AskClose = false;
+			ChangeBarFont(new Font("Courier New",12),NcBars.All);
 		}
 
 		public override void OnHelp()
