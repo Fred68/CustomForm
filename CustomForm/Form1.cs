@@ -2,10 +2,10 @@ using NcForms;
 
 namespace CustomForm
 {
-	public partial class Form1 : NcForms.NcForm
+	public partial class Form1:NcForms.NcForm
 	{
 
-		public Form1(NcFormStyle style, NcFormColor color) : base(style, color)
+		public Form1(NcFormStyle style,NcFormColor color) : base(style,color)
 		{
 			InitializeComponent();
 		}
@@ -20,13 +20,18 @@ namespace CustomForm
 			StatusText = "OK";
 			Opacity = 0.1f;
 			ResizeToContent(20,10);
-			AskClose = false;
+			//AskClose = false;
 			SetBarFont(new Font("Courier New",12),NcBars.All);
 		}
 
 		public override void OnHelp()
 		{
 			MessageBox.Show("New help");
+		}
+
+		private void Form1_Load(object sender,EventArgs e)
+		{
+			AskClose = false;
 		}
 	}
 }

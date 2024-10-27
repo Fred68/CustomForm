@@ -317,13 +317,10 @@ namespace NcForms
 						if(control.Top < pmin.Y) {pmin.Y = control.Top; ymin = true;}
 						if(control.Right > pmax.X) {pmax.X = control.Right; xmax = true;}
 						if(control.Bottom > pmax.Y) {pmax.Y = control.Bottom; ymax = true;}
-
-						//sb.AppendLine($"{control.Name} top={control.Top} left={control.Left} bottom={control.Bottom} right={control.Right}");
 					}
 				}
 
 			}
-			//MessageBox.Show(sb.ToString(),"Derived class controls");
 			if(xmin && xmax && ymin && ymax)
 			{
 				Size newsize = new Size(pmax.X + xDistance, pmax.Y + tsLower.Height + yDistance);
@@ -956,6 +953,7 @@ namespace NcForms
 			{
 				NcWindowsState = NcFormWindowStates.Normal;
 			}
+			SetTitleBar();
 		}
 		private void tsTop_Click(object sender,EventArgs e)
 		{
@@ -965,8 +963,7 @@ namespace NcForms
 		private void tsHelp_Click(object sender,EventArgs e)
 		{
 			OnHelp();		// Chiama la funzione virtuale (che può subire l'override)
-		}
-		
+		}		
 		private void tsBar_DoubleClick()
 		{
 			SwitchBarOnly();

@@ -77,7 +77,7 @@
 			// label2
 			// 
 			label2.AutoSize = true;
-			label2.Location = new Point(272,215);
+			label2.Location = new Point(105,113);
 			label2.Name = "label2";
 			label2.Size = new Size(38,15);
 			label2.TabIndex = 4;
@@ -95,6 +95,7 @@
 			Controls.Add(toolStrip1);
 			Name = "Form1";
 			Text = "Form1";
+			Load += Form1_Load;
 			Controls.SetChildIndex(toolStrip1,0);
 			Controls.SetChildIndex(button1,0);
 			Controls.SetChildIndex(label1,0);
