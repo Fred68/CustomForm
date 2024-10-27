@@ -368,28 +368,28 @@ namespace NcForms
 		/// </summary>
 		/// <param name="execAssy">from Assembly.GetExecutingAssembly()</param>
 		/// <returns></returns>
-		protected string Version(Assembly asm)
+		protected string Version(Assembly asm, bool details = false)
 		{
 			StringBuilder strb = new StringBuilder();
 			try
 			{
+				strb.AppendLine(Application.ProductName);
 				if(asm != null)
 				{
 					System.Version? v = asm.GetName().Version;
 					if(v != null) strb.AppendLine($"Version: {v.ToString()} ({BuildTime(asm)})");
-					string? n = asm.GetName().Name;
-					if(n != null) strb.AppendLine("Assembly name: " + n);
-					strb.AppendLine("BuildTime time: "+ File.GetCreationTime(asm.Location).ToString());
-					strb.AppendLine("BuildTime number: " + BuildTime(asm,true));
+					if(details)
+					{
+						string? n = asm.GetName().Name;
+						if(n != null) strb.AppendLine("Assembly name: " + n);
+						strb.AppendLine("BuildTime time: "+ File.GetCreationTime(asm.Location).ToString());
+						strb.AppendLine("BuildTime number: " + BuildTime(asm,true));
+						strb.AppendLine("Executable path: " + Application.ExecutablePath);
+					}
 				}
-				strb.AppendLine("Product name: " + Application.ProductName);
 				strb.AppendLine("Copyright: " + Application.CompanyName);
-				strb.AppendLine("Executable path: " + Application.ExecutablePath);
 			}
-			catch
-			{
-				MessageBox.Show("Error in Version()");
-			}
+			catch	{}
 			return strb.ToString();
 		}
 		/// <summary>
@@ -406,7 +406,7 @@ namespace NcForms
 				if(number)
 					strb.Append(String.Format("{0:yyMMddhh}.{0:mmss}",dt));
 				else
-					strb.Append(dt.ToString("D"));
+					strb.Append(dt.ToString("d"));
 			}	
 			return strb.ToString();
 		}
