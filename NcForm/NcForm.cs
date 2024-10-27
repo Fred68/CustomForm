@@ -626,7 +626,7 @@ namespace NcForms
 			tsHelp.RightToLeft = RightToLeft.No;
 			tsHelp.Size = new Size(23,22);
 			tsHelp.Text = "?";
-			tsHelp.ToolTipText = "OnHelp";
+			tsHelp.ToolTipText = "Help";
 			tsHelp.Click += tsHelp_Click;
 			// 
 			// tsMax
