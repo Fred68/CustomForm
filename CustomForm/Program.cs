@@ -1,6 +1,8 @@
+using NcForm;
+
 namespace CustomForm
 {
-	internal static class Program
+    internal static class Program
 	{
 		/// <summary>
 		///  The main entry point for the application.
@@ -11,7 +13,7 @@ namespace CustomForm
 			// To customize application configuration such as set high DPI settings or default font,
 			// see https://aka.ms/applicationconfiguration.
 			ApplicationConfiguration.Initialize();
-			Application.Run(new Form1(NcForms.NcFormStyle.Fixed,NcForms.NcFormColor.Normal));
+			Application.Run(new Form1(NcFormStyle.Normal,NcFormColor.Normal));
 		}
 	}
 }

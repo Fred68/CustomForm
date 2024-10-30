@@ -1,9 +1,11 @@
-using NcForms;
+using NcForm;
+using System.ComponentModel.Design;
 using System.Reflection;
+//using static System.Net.Mime.MediaTypeNames;
 
 namespace CustomForm
 {
-	public partial class Form1:NcForms.NcForm
+    public partial class Form1:NcForms.NcForm
 	{
 
 		public Form1(NcFormStyle style,NcFormColor color) : base(style,color)
@@ -33,8 +35,15 @@ namespace CustomForm
 
 		private void Form1_Load(object sender,EventArgs e)
 		{
+			#if false
+			Button bt = new Button();
+			bt.Text = "Pippo";
+			bt.Location = new Point(100,200);
+			bt.Visible = true;
+			this.Controls.Add(bt);
+			#endif
 			AskClose = false;
-				Opacity = 0.2f;
+			Opacity = 0.2f;
 		}
 	}
 }

@@ -1,4 +1,5 @@
-﻿using NcForm.Properties;
+﻿using NcForm;
+using NcForm.Properties;
 using System.Drawing;
 using System.Reflection;
 using System.Text;
@@ -14,10 +15,10 @@ namespace NcForms
 #pragma warning disable CS8622
 #pragma warning disable CS8600
 #pragma warning disable CS8603
-	/// <summary>
-	/// Non Client Area Window base class
-	/// </summary>
-	public class NcForm:Form
+    /// <summary>
+    /// Non Client Area Window base class
+    /// </summary>
+    public class NcForm : Form
 	{
 		/************************/
 		// Private members
@@ -84,6 +85,11 @@ namespace NcForms
 		/// </summary>
 		public NcForm() : this(NcFormStyle.Normal,NcFormColor.Normal) { }
 		/// <summary>
+		/// Constructor with same style and color
+		/// </summary>
+		/// <param name="ncf"></param>
+		public NcForm(NcForm ncf) : this(ncf.ncStyle,ncf.ncColor) { }
+		/// <summary>
 		/// Constructor with params.
 		/// NcForm potentially null fields are checked by a try...catch
 		/// </summary>
@@ -135,8 +141,23 @@ namespace NcForms
 		/************************/
 
 		/************************/
-		// Protected functions
+		// Public members
 		/************************/
+
+		/// <summary>
+		/// NcStyle (readonly)
+		/// </summary>
+		public NcFormStyle NcStyle { get { return ncStyle; } }
+		/// <summary>
+		/// NcColor (readonly)
+		/// </summary>
+		public NcFormColor NcColor { get { return ncColor; } }
+		/************************/
+
+		/************************/
+		// Protected members
+		/************************/
+
 		/// <summary>
 		/// Set/Get WindowsState: Minimized, Maximized, Normal, BarOnly
 		/// </summary>
@@ -206,8 +227,7 @@ namespace NcForms
 
 			}
 
-		}
-		
+		}	
 		/// <summary>
 		/// Text on the status bar
 		/// </summary>
@@ -226,7 +246,7 @@ namespace NcForms
 			{
 				SetTitleBar(value);
 			}
-		}
+		}	
 		/// <summary>
 		/// Opacity
 		/// </summary>
@@ -276,10 +296,11 @@ namespace NcForms
 			}
 		}
 		/// <summary>
-		/// Title height
+		/// Title height (readonly)
 		/// </summary>
 		protected int BarHeight
 		{
+			#warning Title heiht ? No toolbar Height !
 			get { return minTitleSz.Height + tsItemExtraWidth; }
 		}
 		/// <summary>
@@ -438,6 +459,16 @@ namespace NcForms
 
 				}
 			}
+		/// <summary>
+		/// Add needed events to control
+		/// if created after base.OnLoad event
+		/// </summary>
+		/// <param name="control"></param>
+		protected void SetupControlEvents(Control control)
+		{
+			control.MouseEnter += eMouseEnter;
+			control.MouseLeave += eMouseLeave;
+		}
 		/************************/
 
 		/**************************************/
@@ -539,7 +570,7 @@ namespace NcForms
 			tsLower.SuspendLayout();
 			SuspendLayout();
 			// 
-			// ts
+			// tsUpper
 			// 
 			tsUpper.BackColor = SystemColors.Control;
 			tsUpper.CanOverflow = false;
@@ -668,7 +699,7 @@ namespace NcForms
 			tsBar.ToolTipText = "BarOnly";
 			tsBar.Click += tsBar_Click;
 			// 
-			// tsStat
+			// tsLower
 			// 
 			tsLower.CanOverflow = false;
 			tsLower.Dock = DockStyle.Bottom;
@@ -720,6 +751,7 @@ namespace NcForms
 			ResumeLayout(false);
 			PerformLayout();
 		}
+
 		/// <summary>
 		/// Set-up form controls' handlers
 		/// </summary>
@@ -730,7 +762,6 @@ namespace NcForms
 			SetEnterLeaveForSingleControl(tsUpper,eMouseEnter,eMouseLeave,etsMouseEnter,etsMouseLeave);
 			SetMouseMoveSingleControl(tsUpper,Mouse_Move);
 			SetTitleBar();
-
 		}
 		private bool IsBaseControl(Control control)
 		{
