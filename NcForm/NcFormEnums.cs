@@ -1,4 +1,4 @@
-﻿namespace NcForm
+﻿namespace NcForms
 {
 
     /// <summary>

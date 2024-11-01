@@ -1,4 +1,4 @@
-﻿namespace NcForm
+﻿namespace NcForms
 {
 
     /// <summary>
@@ -19,9 +19,7 @@
             opacity = opac;
         }
 
-        /// <summary>
-        /// Normal with everything
-        /// </summary>
+        
         public static NcFormColor Normal = new NcFormColor(Color.White, Color.White, Color.White, 0.9f);
         public static NcFormColor Simple = new NcFormColor(Color.White, Color.White, Color.White, 0.9f);
         public static NcFormColor Fixed = new NcFormColor(Color.White, Color.White, Color.White, 0.5f);
