@@ -18,7 +18,7 @@ namespace CustomForm
 		{
 			this.ClientSize = new System.Drawing.Size(300,200);
 			TitleColor = Color.LightBlue;
-			BackgroundColor = Color.LightGreen;
+			BackColor = Color.LightSalmon;
 			StatusBarColor = Color.Gray;
 			Title = "Pippo";
 			StatusText = "OK";

@@ -54,7 +54,7 @@ namespace NcForms
 
 		Size minTitleSz;
 		bool showTsHelp, showTsMenu, showTsMaxMin, showTsBar, showTsTop;
-		Color colorTitle, colorStatusBar, colorBackground;
+		Color colorTitle, colorStatusBar;
 		int availWidthUpper, availWidthLower;
 
 		private ToolStripButton tsMin;
@@ -128,7 +128,7 @@ namespace NcForms
 
 			TitleColor = ncColor.titleBarColor;
 			StatusBarColor = ncColor.statusBarColor;
-			BackgroundColor = ncColor.backgroundColor;
+			BackColor = NcColor.backColor;
 			Opacity = ncColor.opacity;
 			lastMouseDownEventTime = DateTime.Now;
 			DblClickDelaySeconds = NcFormStyle.dblclkOnBarSecondsDefault;
@@ -279,19 +279,6 @@ namespace NcForms
 				tsLower.BackColor = colorStatusBar;
 			}
 		}
-		/// <summary>
-		/// Background color
-		/// </summary>
-		public Color BackgroundColor
-		{
-			get { return colorBackground; }
-			set
-			{
-				colorBackground = value;
-				this.BackColor = colorBackground;
-			}
-		}
-
 		/// <summary>
 		/// Title height (readonly)
 		/// </summary>

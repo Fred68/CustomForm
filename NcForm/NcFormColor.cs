@@ -6,14 +6,14 @@
     /// </summary>
     public class NcFormColor
     {
-        public Color backgroundColor;
+        public Color backColor;
         public Color titleBarColor;
         public Color statusBarColor;
         public float opacity;
 
         public NcFormColor(Color bkgnd, Color title, Color status, float opac)
         {
-            backgroundColor = bkgnd;
+            backColor = bkgnd;
             titleBarColor = title;
             statusBarColor = status;
             opacity = opac;

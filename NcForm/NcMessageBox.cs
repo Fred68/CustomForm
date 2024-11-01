@@ -32,9 +32,11 @@ namespace NcForms
 			DialogResult res = DialogResult.Cancel;
 
 			NcFormStyle ncFs = new NcFormStyle(NcWindowsStyles.None,NcFormWindowStates.Normal);
-			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackgroundColor,ncf.TitleColor, ncf.StatusBarColor, ncf.Opacity) : NcFormColor.Normal;
+			#warning RIPRISTINARE !
+			//NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackgroundColor,ncf.TitleColor, ncf.StatusBarColor, ncf.Opacity) : NcFormColor.Normal;
+			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackColor,ncf.TitleColor, ncf.StatusBarColor, ncf.Opacity) : NcFormColor.Normal;
 			NcMessageBox mb = new NcMessageBox(ncFs,ncFc);
-			
+			mb.textBox1.BackColor = ncFc.backColor;
 			mb.SetText(text,"About");
 
 			#if false
