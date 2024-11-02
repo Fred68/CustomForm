@@ -10,26 +10,25 @@ using System.Windows.Forms;
 namespace NcForms
 {
 
-	#warning DA COMPLETARE: sistemare visibilità MessageBoxButtons buttons
-	#warning DA COMPLETARE: creazione buttons
-	#warning DA COMPLETARE: modifica in base a MessageBoxButtons buttons
-	
-
 	public class NcMessageBox:NcForms.NcForm
 	{
+
+		#region Private memebers
 		const string STRING_EMPTY = "";
 		const float MB_OPACITY = 1.0f;
 
-		private Button? button1;
+		private Button button1;
 		private TextBox textBox1;
 
 		private Button[] bts;
+		#endregion
 
 		/// <summary>
-		/// static object for the only public static NcMessageBox.Show(...)
+		/// Static object for the static funcion: NcMessageBox.Show(...)
+		/// Alternative: ThreadLocal<NcMessageBox> _mb;
 		/// </summary>
+		[ThreadStatic]
 		static NcMessageBox? _mb;
-
 
 		/// <summary>
 		/// Show dialog
@@ -44,9 +43,8 @@ namespace NcForms
 			DialogResult res = DialogResult.Cancel;
 			NcFormStyle ncFs = new NcFormStyle(NcWindowsStyles.None,NcFormWindowStates.Normal);		// NcWindowsStyles.None: no lower bar
 			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackColor,ncf.TitleColor,ncf.StatusBarColor,MB_OPACITY) : NcFormColor.Normal;
-			using(_mb = new NcMessageBox(ncFs,ncFc))
+			using(_mb = new NcMessageBox(ncFs,ncFc,buttons))
 			{
-				_mb.SetUpButtons(buttons);
 				_mb.textBox1.BackColor = ncFc.backColor;
 				_mb.SetText(text,caption);
 				res = _mb.ShowDialog();
@@ -54,25 +52,22 @@ namespace NcForms
 			return res;
 		}
 
+		#region Private functions
 		private NcMessageBox(NcFormStyle style,NcFormColor color, MessageBoxButtons buttons = MessageBoxButtons.OK) : base(style,color)
 		{
 			InitializeComponent();
 			SetUpButtons(buttons);
 			AdjustIfNoLowerBar();
-			
+			Invalidate();
 		}
 		private NcMessageBox() : this(NcFormStyle.Fixed,NcFormColor.Normal) { }
 		private NcMessageBox(NcForms.NcForm ncf) : this(ncf.NcStyle,ncf.NcColor) { }
-
-		
-
 		private NcMessageBox(NcForm ncf,string text,string caption = STRING_EMPTY,MessageBoxButtons buttons = MessageBoxButtons.OK) :
 					this(ncf.NcStyle,ncf.NcColor)
 		{
 			BackColor = ncf.BackColor;
 			SetText(text,caption);
 		}
-
 		private void InitializeComponent()
 		{
 			button1 = new Button();
@@ -81,7 +76,7 @@ namespace NcForms
 			// 
 			// button1
 			// 
-			button1.Location = new Point(390,292);
+			button1.Location = new Point(379,356);
 			button1.Name = "button1";
 			button1.Size = new Size(75,40);
 			button1.TabIndex = 3;
@@ -97,12 +92,12 @@ namespace NcForms
 			textBox1.Name = "textBox1";
 			textBox1.ReadOnly = true;
 			textBox1.ScrollBars = ScrollBars.Vertical;
-			textBox1.Size = new Size(488,261);
+			textBox1.Size = new Size(483,325);
 			textBox1.TabIndex = 4;
 			// 
 			// NcMessageBox
 			// 
-			ClientSize = new Size(488,360);
+			ClientSize = new Size(483,452);
 			Controls.Add(textBox1);
 			Controls.Add(button1);
 			Name = "NcMessageBox";
@@ -111,24 +106,24 @@ namespace NcForms
 			ResumeLayout(false);
 			PerformLayout();
 		}
-
 		private void AdjustIfNoLowerBar()
 		{
 			if((this.NcStyle.ncWindowsStyle & NcWindowsStyles.LowerBar) == 0)	// No lower bar
 			{
 				SuspendLayout();
-
+				int i=0;
 				foreach(Button b in bts)
 				{
 					b.Location = new Point(b.Location.X,b.Location.Y + LowerBarHeight);
-				}
+					i++;
+				} 
 				textBox1.Size = new Size(textBox1.Size.Width,textBox1.Size.Height + LowerBarHeight);
+
 				ResumeLayout(false);
 				PerformLayout();
 			}
 
 		}
-
 		private void SetUpButtons(MessageBoxButtons buttons)
 		{
 			int nbuttons = 1;
@@ -168,67 +163,87 @@ namespace NcForms
 			button1.Visible = false;
 			Controls.Remove(button1 as Button);
 
-			for(int i = 0; i < nbuttons; i++)
+			for(int i = 0;i < nbuttons;i++)
 			{
 				bts[i] = new Button();
 				bts[i].Size = sz;
-				bts[i].Location = new Point(lc.X - sz.Width * 1, lc.Y);
+				bts[i].Location = new Point(lc.X - sz.Width * i,lc.Y);
+				bts[i].Visible = true;
 				Controls.Add(bts[i]);
 			}
 
-			//switch(buttons)
-			//{
-			//	case MessageBoxButtons.OK:
-			//	{
-			//		button1.DialogResult = DialogResult.OK;
-			//		button1.Text = "OK";
-			//		button2.Visible = button3.Visible = false;
-			//	}
-			//	break;
-			//	case MessageBoxButtons.YesNo:
-			//	{
-			//		button1.DialogResult = DialogResult.Yes;
-			//		button1.Text = "Yes";
-			//		button1.DialogResult = DialogResult.No;
-			//		button1.Text = "No";
-			//		button3.Visible = false;
-			//	}
-			//	break;
-			//	case MessageBoxButtons.YesNoCancel:
-			//	{
+			switch(buttons)
+			{
+				case MessageBoxButtons.OK:
+				{
+					bts[0].DialogResult = DialogResult.OK;
+					bts[0].Text = "OK";
+				}
+				break;
+				case MessageBoxButtons.YesNo:
+				{
+					bts[0].DialogResult = DialogResult.No;
+					bts[0].Text = "No";
+					bts[1].DialogResult = DialogResult.Yes;
+					bts[1].Text = "Yes";
 
-			//	}
-			//	break;
-			//	case MessageBoxButtons.AbortRetryIgnore:
-			//	{
+				}
+				break;
+				case MessageBoxButtons.YesNoCancel:
+				{
+					bts[0].DialogResult = DialogResult.Cancel;
+					bts[0].Text = "Cancel";
+					bts[1].DialogResult = DialogResult.No;
+					bts[1].Text = "No";
+					bts[2].DialogResult = DialogResult.Yes;
+					bts[2].Text = "Yes";
+				}
+				break;
+				case MessageBoxButtons.AbortRetryIgnore:
+				{
+					bts[0].DialogResult = DialogResult.Ignore;
+					bts[0].Text = "Ignore";
+					bts[1].DialogResult = DialogResult.Retry;
+					bts[1].Text = "Retry";
+					bts[2].DialogResult = DialogResult.Abort;
+					bts[2].Text = "Abort";
+				}
+				break;
+				case MessageBoxButtons.RetryCancel:
+				{
+					bts[0].DialogResult = DialogResult.Cancel;
+					bts[0].Text = "Cancel";
+					bts[1].DialogResult = DialogResult.Retry;
+					bts[1].Text = "Retry";
+				}
+				break;
+				case MessageBoxButtons.CancelTryContinue:
+				{
+					bts[0].DialogResult = DialogResult.Continue;
+					bts[0].Text = "Continue";
+					bts[1].DialogResult = DialogResult.TryAgain;
+					bts[1].Text = "TryAgain";
+					bts[2].DialogResult = DialogResult.Cancel;
+					bts[2].Text = "Cancel";
+				}
+				break;
+				case MessageBoxButtons.OKCancel:
+				{
+					bts[0].DialogResult = DialogResult.Cancel;
+					bts[0].Text = "Cancel";
+					bts[1].DialogResult = DialogResult.OK;
+					bts[1].Text = "OK";
+				}
+				break;
 
-			//	}
-			//	break;
-			//	case MessageBoxButtons.RetryCancel:
-			//	{
-
-			//	}
-			//	break;
-			//	case MessageBoxButtons.CancelTryContinue:
-			//	{
-
-			//	}
-			//	break;
-			//	case MessageBoxButtons.OKCancel:
-			//	{
-
-			//	}
-			//	break;
-				
-				
+			
 
 
 
 
-			//}
-
+			}
+			Invalidate();
 		}
-
 		private void SetText(string text,string caption = "Help",string statusText = STRING_EMPTY)
 		{
 			textBox1.Text = text;
@@ -244,7 +259,7 @@ namespace NcForms
 			AskClose = false;
 			TopMost = true;
 		}
-
+		#endregion
 	}
 
 }
