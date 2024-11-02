@@ -29,10 +29,16 @@ namespace CustomForm
 
 		protected override void OnHelp()
 		{
+			DialogResult dr;
 			//base.OnHelp();
 			//MessageBox.Show(Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help");
-			DialogResult dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.OK);
-			
+			//DialogResult dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.OK);
+
+			//NcMessageBox mb = new NcMessageBox(this,"AAAA","bbb");
+			//dr= mb.ShowDialog();
+			//MessageBox.Show(dr.ToString());
+
+			dr = NcMessageBox.Show(this,"AAA","bbb",MessageBoxButtons.OKCancel);
 			MessageBox.Show(dr.ToString());
 		}
 

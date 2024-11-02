@@ -13,6 +13,7 @@
         Help = 1 << 2,
         Resizable = 1 << 3,
         TopMost = 1 << 4,
+        LowerBar = 1 << 5,
         All = -1
     }
 

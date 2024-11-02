@@ -44,7 +44,7 @@
         /// <summary>
         /// Fixed with only help, not resizable
         /// </summary>
-        public static NcFormStyle Fixed = new NcFormStyle(NcWindowsStyles.Help | NcWindowsStyles.TopMost, NcFormWindowStates.Normal);
+        public static NcFormStyle Fixed = new NcFormStyle(NcWindowsStyles.Help | NcWindowsStyles.TopMost | NcWindowsStyles.LowerBar, NcFormWindowStates.Normal);
 
     }
 

@@ -69,6 +69,7 @@ namespace NcForms
 		bool hasHelp;
 		bool isResizable;
 		bool hasTopMost;
+		bool hasLowerBar;
 
 		bool askClose, closing, loading;
 
@@ -105,7 +106,8 @@ namespace NcForms
 			hasHelp = (ncStyle.ncWindowsStyle & NcWindowsStyles.Help) != 0;
 			isResizable = (ncStyle.ncWindowsStyle & NcWindowsStyles.Resizable) != 0;
 			hasTopMost = (ncStyle.ncWindowsStyle & NcWindowsStyles.TopMost) != 0;
-			
+			hasLowerBar = ((ncStyle.ncWindowsStyle & NcWindowsStyles.LowerBar) != 0) || isResizable;
+
 			try
 			{
 				InitializeComponent();
@@ -160,7 +162,7 @@ namespace NcForms
 		public NcFormWindowStates NcWindowsState
 		{
 			get { return ncWindowsState; }
-			set
+			protected set
 			{
 				switch(value)
 				{
@@ -210,10 +212,8 @@ namespace NcForms
 							this.ncWindowsState = NcFormWindowStates.BarOnly;
 							tsLower.Visible = false;
 							tsMin.Visible = tsMax.Visible = false;
-							//this.Size = new Size(Size.Width,ts.Height);
 							this.Size = new Size(Size.Width - int.Min(availWidthUpper,availWidthLower),tsUpper.Height);
 							tsTitle.AutoSize = true;
-							//Invalidate();
 						}
 						break;
 
@@ -230,7 +230,7 @@ namespace NcForms
 		public string StatusText
 		{
 			get { return statLabel.Text; }
-			set { statLabel.Text = value; }
+			protected set { statLabel.Text = value; }
 		}
 		/// <summary>
 		/// Title text
@@ -238,7 +238,7 @@ namespace NcForms
 		public string Title
 		{
 			get { return tsTitle.Text; }
-			set
+			protected set
 			{
 				SetTitleBar(value);
 			}
@@ -249,7 +249,7 @@ namespace NcForms
 		public new float Opacity
 		{
 			get { return opacity; }
-			set
+			protected set
 			{
 				opacity = value;
 				base.Opacity = opacity;
@@ -261,7 +261,7 @@ namespace NcForms
 		public Color TitleColor
 		{
 			get { return colorTitle; }
-			set
+			protected set
 			{
 				colorTitle = value;
 				tsUpper.BackColor = colorTitle;
@@ -273,7 +273,7 @@ namespace NcForms
 		public Color StatusBarColor
 		{
 			get { return colorStatusBar; }
-			set
+			protected set
 			{
 				colorStatusBar = value;
 				tsLower.BackColor = colorStatusBar;
@@ -282,10 +282,13 @@ namespace NcForms
 		/// <summary>
 		/// Title height (readonly)
 		/// </summary>
-		public int BarHeight
+		public int UpperBarHeight
 		{
-			#warning Title heiht ? No toolbar Height !
 			get { return minTitleSz.Height + tsItemExtraWidth; }
+		}
+		public int LowerBarHeight
+		{
+			get { return tsLower.Height + tsItemExtraWidth; }
 		}
 		/// <summary>
 		/// TimeSpan to identify a double click on upper toolbar
@@ -294,7 +297,7 @@ namespace NcForms
 		public double DblClickDelaySeconds
 		{
 			get {return doubleClickDelay.TotalSeconds;}
-			set {doubleClickDelay = TimeSpan.FromSeconds(value);}
+			protected set {doubleClickDelay = TimeSpan.FromSeconds(value);}
 		}
 		/// <summary>
 		/// Ask before closing
@@ -302,7 +305,7 @@ namespace NcForms
 		public bool AskClose
 		{
 			get {	return askClose;	}
-			set {
+			protected set {
 					askClose = value;
 					tsQuit.ToolTipText = askClose ? "Close" : "Close immediately";
 				}
@@ -310,7 +313,7 @@ namespace NcForms
 		/// <summary>
 		/// Resize form to content
 		/// </summary>
-		public void ResizeToContent(int xDistance = 0, int yDistance = 0)
+		protected void ResizeToContent(int xDistance = 0, int yDistance = 0)
 		{
 			StringBuilder sb = new StringBuilder();
 			Point pmin = new Point(int.MaxValue, int.MaxValue);
@@ -345,12 +348,12 @@ namespace NcForms
 		/// </summary>
 		/// <param name="font"></param>
 		/// <param name="ncbar"></param>
-		public void SetBarFont(Font font, NcBars ncbar)
+		protected void SetBarFont(Font font, NcBars ncbar)
 		{
 			int oldHgt = tsUpper.Height;
 			if( (ncbar & NcBars.Upper) != 0 )		tsUpper.Font = font;
 			if( (ncbar & NcBars.Lower) != 0 )		tsLower.Font = font;
-			minTitleSz = tsTitle.Size;
+			minTitleSz = tsUpper.Size;		// not tsTitle.Size;
 			MoveControls(0, tsUpper.Height - oldHgt);
 		}
 		/// <summary>
@@ -358,7 +361,7 @@ namespace NcForms
 		/// </summary>
 		/// <param name="ncbar"></param>
 		/// <returns></returns>
-		public Font GetBarFont(NcBars ncbar)
+		protected Font GetBarFont(NcBars ncbar)
 		{
 			Font f = null;
 			if(ncbar == NcBars.Upper)		
@@ -423,7 +426,7 @@ namespace NcForms
 		/// </summary>
 		/// <param name="xDelta"></param>
 		/// <param name="yDelta"></param>
-		public void MoveControls(int xDelta, int yDelta)
+		protected void MoveControls(int xDelta, int yDelta)
 		{
 			foreach(Control control in this.Controls)
 				{
@@ -448,7 +451,7 @@ namespace NcForms
 		/// if created after base.OnLoad event
 		/// </summary>
 		/// <param name="control"></param>
-		public void SetupControlEvents(Control control)
+		protected void SetupControlEvents(Control control)
 		{
 			control.MouseEnter += eMouseEnter;
 			control.MouseLeave += eMouseLeave;
@@ -507,6 +510,7 @@ namespace NcForms
 			tsHelp.Visible = tsmiHelp.Visible = showTsHelp;
 			tsMax.Visible = tsMin.Visible = tsBar.Visible = showTsMaxMin;
 			tsTop.Visible = showTsTop;
+			tsLower.Visible = hasLowerBar;
 
 			if(txt != null) tsTitle.Text = txt;
 			tsTitle.AutoSize = true;
