@@ -260,23 +260,55 @@ namespace NcForms
 			richTextBox1.DeselectAll();
 			bts[bts.Length - 1].Select();
 
-
 			#warning COMPLETARE ridimensionamento NcMessageBoxin base al testo (ridurre soltanto)
-			Size txtSz = MeasureRichTexBoxText(richTextBox1 as RichTextBox);
-			Size rtbSz = richTextBox1.Size;
-			MessageBox.Show($"RichTextBox size= {rtbSz}\n\rText size= {txtSz}");
+			Size sz = GetAdjRtBoxOffset();
+
+			MessageBox.Show($"Delta size= {sz}");
+			if((sz.Width !=0) || (sz.Height !=0))
+			{
+			#warning CORREGGERE LE DIMENSIONI (BORDO MINIMO + BARRA SCORRIMENTO VERTICALE DELLA TEXTBOX)
+			#warning CORREGGERE LE DIMENSIONI (larghezza dei tre pulsanti)
+			#warning RIDIMENSIONARE ALTEZZA RTBOX
+			#warning SPOSTARE O TRE PULSANTI
+			
+
+				Size = Size + sz;
+
+			}
+
+
 
 			this.CenterToScreen();
 		}
 
-		private Size MeasureRichTexBoxText(RichTextBox rtb)
+		private Size MeasureRtBoxText(RichTextBox rtb)
 		{
 			Size txtSz = new Size();
 			Font fnt = rtb.Font;
-
 			txtSz = TextRenderer.MeasureText(rtb.Text, fnt);
-
 			return txtSz;
+		}
+
+		private Size GetAdjRtBoxOffset()
+		{
+			int dW,dH;
+			dW = dH = 0;
+
+			Size txtSz = MeasureRtBoxText(richTextBox1 as RichTextBox);
+			Size rtbSz = richTextBox1.Size;
+			
+			MessageBox.Show($"RichTextBox size= {rtbSz}\n\rText size= {txtSz}");
+
+			if(txtSz.Width < rtbSz.Width)
+			{
+				dW = txtSz.Width - rtbSz.Width;	
+			}
+			if(txtSz.Height < rtbSz.Height)
+			{
+				dH = txtSz.Height - rtbSz.Height;
+			}
+
+			return new Size(dW,dH);
 		}
 	}
 
