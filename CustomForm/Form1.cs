@@ -31,30 +31,14 @@ namespace CustomForm
 		protected override void OnHelp()
 		{
 			DialogResult dr;
-			//base.OnHelp();
-			//MessageBox.Show(Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help");
-			//DialogResult dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.OK);
-
-			//NcMessageBox mb = new NcMessageBox(this,"AAAA","bbb");
-			//dr= mb.ShowDialog();
-			//MessageBox.Show(dr.ToString());
-
-			dr = NcMessageBox.Show(this,"AAA","bbb",MessageBoxButtons.OKCancel);
+			dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.OKCancel);
 			MessageBox.Show(dr.ToString());
 		}
 
 		private void Form1_Load(object sender,EventArgs e)
 		{
-			#if false
-			Button bt = new Button();
-			bt.Text = "Pippo";
-			bt.Location = new Point(100,200);
-			bt.Visible = true;
-			this.Controls.Add(bt);
-			#endif
-
 			AskClose = false;
-			Opacity = 0.2f;
+			Opacity = 0.4f;
 		}
 	}
 }

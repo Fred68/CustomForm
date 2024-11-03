@@ -95,7 +95,6 @@ namespace NcForms
 			richTextBox1.Size = new Size(483,325);
 			richTextBox1.TabIndex = 5;
 			richTextBox1.Text = "";
-			richTextBox1.TextChanged += richTextBox1_TextChanged;
 			// 
 			// NcMessageBox
 			// 
@@ -260,12 +259,24 @@ namespace NcForms
 		{
 			richTextBox1.DeselectAll();
 			bts[bts.Length - 1].Select();
+
+
+			#warning COMPLETARE ridimensionamento NcMessageBoxin base al testo (ridurre soltanto)
+			Size txtSz = MeasureRichTexBoxText(richTextBox1 as RichTextBox);
+			Size rtbSz = richTextBox1.Size;
+			MessageBox.Show($"RichTextBox size= {rtbSz}\n\rText size= {txtSz}");
+
 			this.CenterToScreen();
 		}
 
-		private void richTextBox1_TextChanged(object sender,EventArgs e)
+		private Size MeasureRichTexBoxText(RichTextBox rtb)
 		{
-		#warning RIDIMENSIONARE IN BASE AL TESTO (LARGHEZZA E NUMERO DI RIGHE).
+			Size txtSz = new Size();
+			Font fnt = rtb.Font;
+
+			txtSz = TextRenderer.MeasureText(rtb.Text, fnt);
+
+			return txtSz;
 		}
 	}
 
