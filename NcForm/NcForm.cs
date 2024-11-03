@@ -4,8 +4,8 @@ using System.Drawing;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+//using System.Windows.Forms.VisualStyles;
+//using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 
@@ -55,6 +55,7 @@ namespace NcForms
 		Size minTitleSz;
 		bool showTsHelp, showTsMenu, showTsMaxMin, showTsBar, showTsTop;
 		Color colorTitle, colorStatusBar;
+		Color colorButtons;
 		int availWidthUpper, availWidthLower;
 
 		private ToolStripButton tsMin;
@@ -129,6 +130,7 @@ namespace NcForms
 			ncWindowsState = prevNcWindowsState = ncStyle.ncFormWindowState;
 
 			TitleColor = ncColor.titleBarColor;
+			ButtonsColor = ncColor.buttonsColor;
 			StatusBarColor = ncColor.statusBarColor;
 			BackColor = NcColor.backColor;
 			Opacity = ncColor.opacity;
@@ -265,6 +267,15 @@ namespace NcForms
 			{
 				colorTitle = value;
 				tsUpper.BackColor = colorTitle;
+			}
+		}
+		public Color ButtonsColor
+		{
+			get { return colorButtons; }
+			protected set
+			{
+				colorButtons = value;
+				SetButtonsColor();
 			}
 		}
 		/// <summary>
@@ -746,6 +757,7 @@ namespace NcForms
 		/// <param name="control"></param>
 		private void SetupControls(Control control)
 		{
+			SetButtonsColor();
 			SetEnterLeaveForControls(control,eMouseEnter,eMouseLeave);
 			SetEnterLeaveForSingleControl(tsUpper,eMouseEnter,eMouseLeave,etsMouseEnter,etsMouseLeave);
 			SetMouseMoveSingleControl(tsUpper,Mouse_Move);
@@ -815,6 +827,16 @@ namespace NcForms
 			}
 
 		}
+		private void SetButtonsColor()
+		{
+			foreach(Control control in this.Controls)
+				{
+					if(control.GetType() == typeof(Button))
+					{
+						control.BackColor = ButtonsColor;
+					}
+				}
+		}
 		private void ClearEnterLeaveForControls(Control control,EventHandler eVmouseEnter,EventHandler eVmouseLeave)
 		{
 			foreach(Control childControl in control.Controls)
@@ -846,8 +868,9 @@ namespace NcForms
 		}
 		private void settingsToolStripMenuItem_Click(object sender,EventArgs e)
 		{
+			#warning DA COMPLETARE
+			NcMessageBox.Show(this,"Funzione da scrivere ex-novo","DA COMPLETARE");
 
-#warning DA COMPLETARE
 			//config.ShowDialog();
 
 		}

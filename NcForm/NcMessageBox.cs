@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace NcForms
 {
@@ -17,10 +18,10 @@ namespace NcForms
 		const string STRING_EMPTY = "";
 		const float MB_OPACITY = 1.0f;
 
-		private Button button1;
-		private TextBox textBox1;
+		private System.Windows.Forms.Button button1;
 
-		private Button[] bts;
+		private System.Windows.Forms.Button[] bts;
+		private RichTextBox richTextBox1;
 		#endregion
 
 		/// <summary>
@@ -41,11 +42,12 @@ namespace NcForms
 		public static DialogResult Show(NcForm? ncf,string text,string caption = STRING_EMPTY,MessageBoxButtons buttons = MessageBoxButtons.OK)
 		{
 			DialogResult res = DialogResult.Cancel;
-			NcFormStyle ncFs = new NcFormStyle(NcWindowsStyles.None,NcFormWindowStates.Normal);		// NcWindowsStyles.None: no lower bar
-			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackColor,ncf.TitleColor,ncf.StatusBarColor,MB_OPACITY) : NcFormColor.Normal;
+			NcFormStyle ncFs = new NcFormStyle(NcWindowsStyles.None,NcFormWindowStates.Normal);     // NcWindowsStyles.None: no lower bar
+			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackColor,ncf.TitleColor,ncf.StatusBarColor,ncf.ButtonsColor,MB_OPACITY) : NcFormColor.Normal;
 			using(_mb = new NcMessageBox(ncFs,ncFc,buttons))
 			{
-				_mb.textBox1.BackColor = ncFc.backColor;
+				_mb.richTextBox1.BackColor = ncFc.backColor;
+				_mb.ButtonsColor = ncFc.buttonsColor;
 				_mb.SetText(text,caption);
 				res = _mb.ShowDialog();
 			}
@@ -53,7 +55,7 @@ namespace NcForms
 		}
 
 		#region Private functions
-		private NcMessageBox(NcFormStyle style,NcFormColor color, MessageBoxButtons buttons = MessageBoxButtons.OK) : base(style,color)
+		private NcMessageBox(NcFormStyle style,NcFormColor color,MessageBoxButtons buttons = MessageBoxButtons.OK) : base(style,color)
 		{
 			InitializeComponent();
 			SetUpButtons(buttons);
@@ -70,8 +72,8 @@ namespace NcForms
 		}
 		private void InitializeComponent()
 		{
-			button1 = new Button();
-			textBox1 = new TextBox();
+			button1 = new System.Windows.Forms.Button();
+			richTextBox1 = new RichTextBox();
 			SuspendLayout();
 			// 
 			// button1
@@ -83,42 +85,43 @@ namespace NcForms
 			button1.Text = "button1";
 			button1.UseVisualStyleBackColor = true;
 			// 
-			// textBox1
+			// richTextBox1
 			// 
-			textBox1.BorderStyle = BorderStyle.None;
-			textBox1.Dock = DockStyle.Top;
-			textBox1.Location = new Point(0,25);
-			textBox1.Multiline = true;
-			textBox1.Name = "textBox1";
-			textBox1.ReadOnly = true;
-			textBox1.ScrollBars = ScrollBars.Vertical;
-			textBox1.Size = new Size(483,325);
-			textBox1.TabIndex = 4;
+			richTextBox1.BorderStyle = BorderStyle.None;
+			richTextBox1.Dock = DockStyle.Top;
+			richTextBox1.Location = new Point(0,25);
+			richTextBox1.Name = "richTextBox1";
+			richTextBox1.ReadOnly = true;
+			richTextBox1.Size = new Size(483,325);
+			richTextBox1.TabIndex = 5;
+			richTextBox1.Text = "";
+			richTextBox1.TextChanged += richTextBox1_TextChanged;
 			// 
 			// NcMessageBox
 			// 
 			ClientSize = new Size(483,452);
-			Controls.Add(textBox1);
+			Controls.Add(richTextBox1);
 			Controls.Add(button1);
 			Name = "NcMessageBox";
+			Shown += NcMessageBox_Shown;
 			Controls.SetChildIndex(button1,0);
-			Controls.SetChildIndex(textBox1,0);
+			Controls.SetChildIndex(richTextBox1,0);
 			ResumeLayout(false);
 			PerformLayout();
 		}
+
 		private void AdjustIfNoLowerBar()
 		{
-			if((this.NcStyle.ncWindowsStyle & NcWindowsStyles.LowerBar) == 0)	// No lower bar
+			if((this.NcStyle.ncWindowsStyle & NcWindowsStyles.LowerBar) == 0)   // No lower bar
 			{
 				SuspendLayout();
-				int i=0;
-				foreach(Button b in bts)
+				int i = 0;
+				foreach(System.Windows.Forms.Button b in bts)
 				{
 					b.Location = new Point(b.Location.X,b.Location.Y + LowerBarHeight);
 					i++;
-				} 
-				textBox1.Size = new Size(textBox1.Size.Width,textBox1.Size.Height + LowerBarHeight);
-
+				}
+				richTextBox1.Size = new Size(richTextBox1.Size.Width,richTextBox1.Size.Height + LowerBarHeight);
 				ResumeLayout(false);
 				PerformLayout();
 			}
@@ -131,44 +134,45 @@ namespace NcForms
 			switch(buttons)
 			{
 				case MessageBoxButtons.OK:
-					{
+				{
 					nbuttons = 1;
-					}
+				}
 				break;
 
 				case MessageBoxButtons.OKCancel:
 				case MessageBoxButtons.YesNo:
 				case MessageBoxButtons.RetryCancel:
-					{
+				{
 					nbuttons = 2;
-					}
+				}
 				break;
 
 				case MessageBoxButtons.YesNoCancel:
 				case MessageBoxButtons.AbortRetryIgnore:
 				case MessageBoxButtons.CancelTryContinue:
-					{
+				{
 					nbuttons = 3;
-					}
+				}
 				break;
 
 				default:
-				break;
+					break;
 			}
 
-			bts = new Button[nbuttons];
+			bts = new System.Windows.Forms.Button[nbuttons];
 			Size sz = button1.Size;
 			Point lc = button1.Location;
 
 			button1.Visible = false;
-			Controls.Remove(button1 as Button);
+			Controls.Remove(button1 as System.Windows.Forms.Button);
 
 			for(int i = 0;i < nbuttons;i++)
 			{
-				bts[i] = new Button();
+				bts[i] = new System.Windows.Forms.Button();
 				bts[i].Size = sz;
 				bts[i].Location = new Point(lc.X - sz.Width * i,lc.Y);
 				bts[i].Visible = true;
+				bts[i].BackColor = this.ButtonsColor;
 				Controls.Add(bts[i]);
 			}
 
@@ -236,30 +240,33 @@ namespace NcForms
 				}
 				break;
 
-			
-
-
-
-
 			}
 			Invalidate();
 		}
 		private void SetText(string text,string caption = "Help",string statusText = STRING_EMPTY)
 		{
-			textBox1.Text = text;
+			richTextBox1.Text = text;
 			Title = caption;
 			if(statusText != STRING_EMPTY)
 			{
 				StatusText = statusText;
 			}
-			else
-			{
-				//ts_lo
-			}
-			AskClose = false;
 			TopMost = true;
+			AskClose = false;
 		}
 		#endregion
+
+		private void NcMessageBox_Shown(object sender,EventArgs e)
+		{
+			richTextBox1.DeselectAll();
+			bts[bts.Length - 1].Select();
+			this.CenterToScreen();
+		}
+
+		private void richTextBox1_TextChanged(object sender,EventArgs e)
+		{
+		#warning RIDIMENSIONARE IN BASE AL TESTO (LARGHEZZA E NUMERO DI RIGHE).
+		}
 	}
 
 }
