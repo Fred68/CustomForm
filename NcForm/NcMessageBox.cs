@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace NcForms
@@ -14,7 +16,7 @@ namespace NcForms
 	public class NcMessageBox:NcForms.NcForm
 	{
 
-		#region Private memebers
+		#region Private members
 		const string STRING_EMPTY = "";
 		const float MB_OPACITY = 1.0f;
 
@@ -78,7 +80,7 @@ namespace NcForms
 			// 
 			// button1
 			// 
-			button1.Location = new Point(379,356);
+			button1.Location = new Point(408,384);
 			button1.Name = "button1";
 			button1.Size = new Size(75,40);
 			button1.TabIndex = 3;
@@ -92,7 +94,7 @@ namespace NcForms
 			richTextBox1.Location = new Point(0,25);
 			richTextBox1.Name = "richTextBox1";
 			richTextBox1.ReadOnly = true;
-			richTextBox1.Size = new Size(483,325);
+			richTextBox1.Size = new Size(483,353);
 			richTextBox1.TabIndex = 5;
 			richTextBox1.Text = "";
 			// 
@@ -161,7 +163,11 @@ namespace NcForms
 			bts = new System.Windows.Forms.Button[nbuttons];
 			Size sz = button1.Size;
 			Point lc = button1.Location;
-
+			if(this.Width > lc.X + sz.Width)		// Calculate as right aligned
+			{
+				lc.X += this.Width - (lc.X + sz.Width);
+			}
+			
 			button1.Visible = false;
 			Controls.Remove(button1 as System.Windows.Forms.Button);
 
@@ -260,24 +266,19 @@ namespace NcForms
 			richTextBox1.DeselectAll();
 			bts[bts.Length - 1].Select();
 
-			#warning COMPLETARE ridimensionamento NcMessageBoxin base al testo (ridurre soltanto)
 			Size sz = GetAdjRtBoxOffset();
-
+			
+			#if DEBUG
 			MessageBox.Show($"Delta size= {sz}");
+			#endif
+
 			if((sz.Width !=0) || (sz.Height !=0))
 			{
-			#warning CORREGGERE LE DIMENSIONI (BORDO MINIMO + BARRA SCORRIMENTO VERTICALE DELLA TEXTBOX)
-			#warning CORREGGERE LE DIMENSIONI (larghezza dei tre pulsanti)
-			#warning RIDIMENSIONARE ALTEZZA RTBOX
-			#warning SPOSTARE O TRE PULSANTI
-			
-
-				Size = Size + sz;
-
+				richTextBox1.Size += sz;							// Resize richTextBox
+				foreach(System.Windows.Forms.Button b in bts)		// Move buttons
+					{ b.Location += sz;}
+				Size += sz;											// Resize Form
 			}
-
-
-
 			this.CenterToScreen();
 		}
 
@@ -295,20 +296,38 @@ namespace NcForms
 			dW = dH = 0;
 
 			Size txtSz = MeasureRtBoxText(richTextBox1 as RichTextBox);
-			Size rtbSz = richTextBox1.Size;
+			Size rtBoxSz = richTextBox1.Size;
+			Size btnSz = GetButtonsSize();
+			#if DEBUG
+			MessageBox.Show($"RichTextBox size= {rtBoxSz}\n\rText size= {txtSz}\n\rButtons size= {btnSz}");
+			#endif
 			
-			MessageBox.Show($"RichTextBox size= {rtbSz}\n\rText size= {txtSz}");
-
-			if(txtSz.Width < rtbSz.Width)
+			if(rtBoxSz.Width > int.Max(txtSz.Width,btnSz.Width))
 			{
-				dW = txtSz.Width - rtbSz.Width;	
+				dW = int.Max(txtSz.Width,btnSz.Width) - rtBoxSz.Width;	
 			}
-			if(txtSz.Height < rtbSz.Height)
+			
+			if(txtSz.Height < rtBoxSz.Height)
 			{
-				dH = txtSz.Height - rtbSz.Height;
+				dH = txtSz.Height - rtBoxSz.Height;
 			}
-
+			
 			return new Size(dW,dH);
+		}
+	
+		private Size GetButtonsSize()
+		{
+			int xmin,xmax,ymin,ymax;
+			xmin = ymin = int.MaxValue;
+			xmax = ymax = int.MinValue;
+			foreach(System.Windows.Forms.Button b in bts)
+			{
+				if(b.Left < xmin)	xmin = b.Left;
+				if(b.Top < ymin)	ymin = b.Top;
+				if(b.Right > xmax)	xmax = b.Right;
+				if(b.Bottom > ymax)	ymax = b.Bottom;
+			}
+			return new Size(xmax-xmin,ymax-ymin);
 		}
 	}
 

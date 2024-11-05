@@ -28,7 +28,7 @@ namespace NcForms
 		public const int tsItemExtraWidth = 3;
 		public const int contentMinHeight = 10;
 
-		private System.ComponentModel.IContainer components;
+		//private System.ComponentModel.IContainer components;
 		private ToolStripDropDownButton tsMenu;
 		private ToolStripButton tsQuit;
 		private ToolStripButton tsHelp;
@@ -521,7 +521,11 @@ namespace NcForms
 			tsHelp.Visible = tsmiHelp.Visible = showTsHelp;
 			tsMax.Visible = tsMin.Visible = tsBar.Visible = showTsMaxMin;
 			tsTop.Visible = showTsTop;
-			tsLower.Visible = hasLowerBar;
+			
+			if(ncWindowsState != NcFormWindowStates.BarOnly)
+			{
+				tsLower.Visible = hasLowerBar;
+			}
 
 			if(txt != null) tsTitle.Text = txt;
 			tsTitle.AutoSize = true;
