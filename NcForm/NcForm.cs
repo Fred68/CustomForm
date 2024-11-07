@@ -873,7 +873,7 @@ namespace NcForms
 		private void settingsToolStripMenuItem_Click(object sender,EventArgs e)
 		{
 			#warning DA COMPLETARE
-			NcMessageBox.Show(this,"Funzione da scrivere ex-novo","DA COMPLETARE");
+			NcMessageBox.Show(this,"Funzione da scrivere ex-novo","DA COMPLETARE",MessageBoxButtons.OK);
 
 			//config.ShowDialog();
 

@@ -5,6 +5,7 @@
 using NcForms;
 using System.ComponentModel.Design;
 using System.Reflection;
+using CustomForm;
 //using static System.Net.Mime.MediaTypeNames;
 
 namespace CustomForm
@@ -49,7 +50,8 @@ namespace CustomForm
 		protected override void OnHelp()
 		{
 			DialogResult dr;
-			dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.YesNoCancel);
+			
+			dr = NcMessageBox.Show(this,Version(Assembly.GetExecutingAssembly()) + LONG_TEXT,"Help",MessageBoxButtons.YesNoCancel,5000);
 			MessageBox.Show(dr.ToString());
 		}
 

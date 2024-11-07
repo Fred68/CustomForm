@@ -13,6 +13,8 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 namespace NcForms
 {
 
+	//#warning  while(exitFlag == false) // Processes all the events in the queue Application.DoEvents();
+
 	public class NcMessageBox:NcForms.NcForm
 	{
 
@@ -24,6 +26,9 @@ namespace NcForms
 
 		private System.Windows.Forms.Button[] bts;
 		private RichTextBox richTextBox1;
+
+		System.Windows.Forms.Timer? timer1 = null;
+
 		#endregion
 
 		/// <summary>
@@ -41,12 +46,12 @@ namespace NcForms
 		/// <param name="caption">Caption on the title bar</param>
 		/// <param name="buttons">System.Windows.Forms.MessageBoxButtons argument</param>
 		/// <returns></returns>
-		public static DialogResult Show(NcForm? ncf,string text,string caption = STRING_EMPTY,MessageBoxButtons buttons = MessageBoxButtons.OK)
+		public static DialogResult Show(NcForm? ncf,string text,string caption = STRING_EMPTY,MessageBoxButtons buttons = MessageBoxButtons.OK,int timerDelay = 0)
 		{
 			DialogResult res = DialogResult.Cancel;
 			NcFormStyle ncFs = new NcFormStyle(NcWindowsStyles.None,NcFormWindowStates.Normal);     // NcWindowsStyles.None: no lower bar
 			NcFormColor ncFc = (ncf != null) ? new NcFormColor(ncf.BackColor,ncf.TitleColor,ncf.StatusBarColor,ncf.ButtonsColor,MB_OPACITY) : NcFormColor.Normal;
-			using(_mb = new NcMessageBox(ncFs,ncFc,buttons))
+			using(_mb = new NcMessageBox(ncFs,ncFc,buttons,timerDelay))
 			{
 				_mb.richTextBox1.BackColor = ncFc.backColor;
 				_mb.ButtonsColor = ncFc.buttonsColor;
@@ -56,18 +61,27 @@ namespace NcForms
 			return res;
 		}
 
+
 		#region Private functions
-		private NcMessageBox(NcFormStyle style,NcFormColor color,MessageBoxButtons buttons = MessageBoxButtons.OK) : base(style,color)
+		private NcMessageBox(NcFormStyle style,NcFormColor color,MessageBoxButtons buttons = MessageBoxButtons.OK,int tmDelay = 0) : base(style,color)
 		{
 			InitializeComponent();
 			SetUpButtons(buttons);
 			AdjustIfNoLowerBar();
+			if(tmDelay > 0)
+			{
+				timer1 = new System.Windows.Forms.Timer();
+				timer1.Interval = tmDelay;
+				timer1.Tick += Timer1_Tick;
+				timer1.Start();
+			}
+
 			Invalidate();
 		}
 		private NcMessageBox() : this(NcFormStyle.Fixed,NcFormColor.Normal) { }
 		private NcMessageBox(NcForms.NcForm ncf) : this(ncf.NcStyle,ncf.NcColor) { }
 		private NcMessageBox(NcForm ncf,string text,string caption = STRING_EMPTY,MessageBoxButtons buttons = MessageBoxButtons.OK) :
-					this(ncf.NcStyle,ncf.NcColor)
+					this(ncf.NcStyle,ncf.NcColor,buttons)
 		{
 			BackColor = ncf.BackColor;
 			SetText(text,caption);
@@ -104,6 +118,7 @@ namespace NcForms
 			Controls.Add(richTextBox1);
 			Controls.Add(button1);
 			Name = "NcMessageBox";
+			FormClosing += NcMessageBox_FormClosing;
 			Shown += NcMessageBox_Shown;
 			Controls.SetChildIndex(button1,0);
 			Controls.SetChildIndex(richTextBox1,0);
@@ -163,11 +178,11 @@ namespace NcForms
 			bts = new System.Windows.Forms.Button[nbuttons];
 			Size sz = button1.Size;
 			Point lc = button1.Location;
-			if(this.Width > lc.X + sz.Width)		// Calculate as right aligned
+			if(this.Width > lc.X + sz.Width)        // Calculate as right aligned
 			{
 				lc.X += this.Width - (lc.X + sz.Width);
 			}
-			
+
 			button1.Visible = false;
 			Controls.Remove(button1 as System.Windows.Forms.Button);
 
@@ -259,76 +274,106 @@ namespace NcForms
 			TopMost = true;
 			AskClose = false;
 		}
-		#endregion
-
 		private void NcMessageBox_Shown(object sender,EventArgs e)
 		{
 			richTextBox1.DeselectAll();
 			bts[bts.Length - 1].Select();
 
 			Size sz = GetAdjRtBoxOffset();
-			
-			#if DEBUG
-			MessageBox.Show($"Delta size= {sz}");
-			#endif
 
-			if((sz.Width !=0) || (sz.Height !=0))
+#if DEBUG
+			MessageBox.Show($"Delta size= {sz}");
+#endif
+
+			if((sz.Width != 0) || (sz.Height != 0))
 			{
-				richTextBox1.Size += sz;							// Resize richTextBox
-				foreach(System.Windows.Forms.Button b in bts)		// Move buttons
-					{ b.Location += sz;}
-				Size += sz;											// Resize Form
+				richTextBox1.Size += sz;                            // Resize richTextBox
+				foreach(System.Windows.Forms.Button b in bts)       // Move buttons
+				{
+					b.Location += sz;
+				}
+				Size += sz;                                         // Resize Form
 			}
 			this.CenterToScreen();
 		}
-
 		private Size MeasureRtBoxText(RichTextBox rtb)
 		{
 			Size txtSz = new Size();
 			Font fnt = rtb.Font;
-			txtSz = TextRenderer.MeasureText(rtb.Text, fnt);
+			txtSz = TextRenderer.MeasureText(rtb.Text,fnt);
 			return txtSz;
 		}
-
 		private Size GetAdjRtBoxOffset()
 		{
-			int dW,dH;
+			int dW, dH;
 			dW = dH = 0;
 
 			Size txtSz = MeasureRtBoxText(richTextBox1 as RichTextBox);
 			Size rtBoxSz = richTextBox1.Size;
 			Size btnSz = GetButtonsSize();
-			#if DEBUG
+#if DEBUG
 			MessageBox.Show($"RichTextBox size= {rtBoxSz}\n\rText size= {txtSz}\n\rButtons size= {btnSz}");
-			#endif
-			
+#endif
+
 			if(rtBoxSz.Width > int.Max(txtSz.Width,btnSz.Width))
 			{
-				dW = int.Max(txtSz.Width,btnSz.Width) - rtBoxSz.Width;	
+				dW = int.Max(txtSz.Width,btnSz.Width) - rtBoxSz.Width;
 			}
-			
+
 			if(txtSz.Height < rtBoxSz.Height)
 			{
 				dH = txtSz.Height - rtBoxSz.Height;
 			}
-			
+
 			return new Size(dW,dH);
 		}
-	
 		private Size GetButtonsSize()
 		{
-			int xmin,xmax,ymin,ymax;
+			int xmin, xmax, ymin, ymax;
 			xmin = ymin = int.MaxValue;
 			xmax = ymax = int.MinValue;
 			foreach(System.Windows.Forms.Button b in bts)
 			{
-				if(b.Left < xmin)	xmin = b.Left;
-				if(b.Top < ymin)	ymin = b.Top;
-				if(b.Right > xmax)	xmax = b.Right;
-				if(b.Bottom > ymax)	ymax = b.Bottom;
+				if(b.Left < xmin)
+					xmin = b.Left;
+				if(b.Top < ymin)
+					ymin = b.Top;
+				if(b.Right > xmax)
+					xmax = b.Right;
+				if(b.Bottom > ymax)
+					ymax = b.Bottom;
 			}
-			return new Size(xmax-xmin,ymax-ymin);
+			return new Size(xmax - xmin,ymax - ymin);
 		}
+
+		private void NcMessageBox_FormClosing(object sender,FormClosingEventArgs e)
+		{
+			if(timer1 != null)
+			{
+				timer1.Stop();
+				#if DEBUG
+				MessageBox.Show("Timer stopped");
+				#endif
+
+			}
+			#if DEBUG
+			MessageBox.Show("Closing dialog");
+			#endif
+
+		}
+
+		private /*static*/ void Timer1_Tick(object? sender,EventArgs e)
+		{
+			#if DEBUG
+			MessageBox.Show("Timer event");
+			#endif
+			Close();
+		}
+
+
+		#endregion
+
+		
 	}
 
 }
