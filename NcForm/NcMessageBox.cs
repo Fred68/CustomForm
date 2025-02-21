@@ -56,6 +56,7 @@ namespace NcForms
 				_mb.richTextBox1.BackColor = ncFc.backColor;
 				_mb.ButtonsColor = ncFc.buttonsColor;
 				_mb.SetText(text,caption);
+				//Size sz = TextRenderer.MeasureText(text,_mb.Font);
 				res = _mb.ShowDialog();
 			}
 			return res;
@@ -300,7 +301,7 @@ namespace NcForms
 		{
 			Size txtSz = new Size();
 			Font fnt = rtb.Font;
-			txtSz = TextRenderer.MeasureText(rtb.Text,fnt);
+			txtSz = TextRenderer.MeasureText(rtb.Text,fnt,txtSz,TextFormatFlags.ExpandTabs);
 			return txtSz;
 		}
 		private Size GetAdjRtBoxOffset()
