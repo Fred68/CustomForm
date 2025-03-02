@@ -56,7 +56,6 @@ namespace NcForms
 				_mb.richTextBox1.BackColor = ncFc.backColor;
 				_mb.ButtonsColor = ncFc.buttonsColor;
 				_mb.SetText(text,caption);
-				//Size sz = TextRenderer.MeasureText(text,_mb.Font);
 				res = _mb.ShowDialog();
 			}
 			return res;
@@ -282,7 +281,7 @@ namespace NcForms
 
 			Size sz = GetAdjRtBoxOffset();
 
-#if DEBUG
+#if false
 			MessageBox.Show($"Delta size= {sz}");
 #endif
 
@@ -312,7 +311,7 @@ namespace NcForms
 			Size txtSz = MeasureRtBoxText(richTextBox1 as RichTextBox);
 			Size rtBoxSz = richTextBox1.Size;
 			Size btnSz = GetButtonsSize();
-#if DEBUG
+#if false
 			MessageBox.Show($"RichTextBox size= {rtBoxSz}\n\rText size= {txtSz}\n\rButtons size= {btnSz}");
 #endif
 
@@ -357,7 +356,7 @@ namespace NcForms
 				#endif
 
 			}
-			#if DEBUG
+			#if false
 			MessageBox.Show("Closing dialog");
 			#endif
 

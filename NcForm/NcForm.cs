@@ -893,6 +893,7 @@ namespace NcForms
 		private void eMouseEnter(object sender,EventArgs e)
 		{
 			base.Opacity = 1f;
+			this.Focus();	// Get focus, no need of an extra click to get it
 		}
 		/// <summary>
 		/// MouseLeave handler.
