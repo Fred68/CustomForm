@@ -174,19 +174,22 @@ namespace NcForms
 						if(this.prevNcWindowsState == NcFormWindowStates.BarOnly)
 						{
 							this.Size = prevSz;
-							tsLower.Visible = true;
+							//tsLower.Visible = true;
+							tsLower.Visible = hasLowerBar;
 							tsMin.Visible = tsMax.Visible = true;
 							SetTitleBar();
 							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
 						else if(this.prevNcWindowsState == NcFormWindowStates.Minimized)
 						{
-							tsLower.Visible = true;
+							//tsLower.Visible = true;
+							tsLower.Visible = hasLowerBar;
 							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
 						else if(this.prevNcWindowsState == NcFormWindowStates.Maximized)
 						{
-							tsLower.Visible = true;
+							//tsLower.Visible = true;
+							tsLower.Visible = hasLowerBar;
 							this.ncWindowsState = NcFormWindowStates.Normal;
 						}
 						tsMax.Text = "+";
