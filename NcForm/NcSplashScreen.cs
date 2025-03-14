@@ -15,16 +15,20 @@ namespace NcForm
 		int _scrPercent;
 		Image? _img = null;
 		Point _imgOrigin = new Point(0,0);
-		string _txt = string.Empty;
+		System.Windows.Forms.Timer? _timer;
+
+		//string _txt = string.Empty;
 
 		/// <summary>
-		/// Crea e lo splash screen
+		/// Create and show a splash screen
 		/// </summary>
-		/// <param name="size">Size</param>
-		/// <param name="scrPercent">Screen percentage. If > 0 and <=100, size is ignored</param>
+		/// <param name="size">Form size</param>
+		/// <param name="scrPercent">Size as screen percentage (0-100)</param>
 		/// <param name="img">Image</param>
-		/// <param name="htmlTxt">html text, under the image</param>
-		public NcSplashScreen(Size size, int scrPercent, Image? img, string? htmlTxt)
+		/// <param name="resize_to_img">Resize form to image</param>
+		/// <param name="delay_msec">delay ms</param>
+		/// <param name="modal">modal (or modeless)</param>
+		public NcSplashScreen(Size size, int scrPercent, Image? img, bool resize_to_img, int delay_msec, bool modal)
 		{
 			SuspendLayout();
 			ShowInTaskbar = false;
@@ -41,31 +45,55 @@ namespace NcForm
 					_img = img;
 				}
 			}
-			if(htmlTxt != null)
-			{
-				if(htmlTxt.Length > 0)
-				{
-					_txt = htmlTxt;
-				}
-			}
+			//if(htmlTxt != null)
+			//{
+			//	if(htmlTxt.Length > 0)
+			//	{
+			//		_txt = htmlTxt;
+			//	}
+			//}
 			
 			RecalcSize();
 
-			this.Size = _size;
+			if(resize_to_img && (_img != null))
+			{
+				this.Size = _img.Size;
+				_imgOrigin = new Point(0,0);
+			}
+			else
+			{
+				this.Size = _size;
+			}
 			
 			if(_img != null)
 			{
 				PictureBox pb = new PictureBox();
 				pb.Image = _img;
 				pb.Location = _imgOrigin;
+				//pb.SizeMode = PictureBoxSizeMode.StretchImage;
 				pb.Size = _img.Size;
-
 				this.Controls.Add(pb);
 			}
 
-
 			ResumeLayout();
 			PerformLayout();
+
+			if(delay_msec > 0)
+			{
+				_timer = new System.Windows.Forms.Timer();
+				_timer.Interval = delay_msec;
+				_timer.Tick += Timer1_Tick;
+				_timer.Start();
+
+				if(modal)
+				{
+					this.ShowDialog();
+				}
+				else
+				{
+					this.Show();
+				}
+			}
 		}
 
 		/// <summary>
@@ -132,6 +160,20 @@ namespace NcForm
 					_imgOrigin = new Point(x, y);
 				}
 			}
+		}
+
+		private void Timer1_Tick(object? sender,EventArgs e)
+		{
+			#if DEBUG
+			MessageBox.Show("Timer event");
+			#endif
+			if(_timer!=null)
+			{
+				_timer.Stop();
+				_timer.Dispose();
+			}
+			Close();
+			this.Dispose();
 		}
 	}
 }
