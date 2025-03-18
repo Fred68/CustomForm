@@ -74,6 +74,7 @@ namespace NcForms
 		bool askClose, closing, loading;
 
 		NcFormWindowStates ncWindowsState, prevNcWindowsState;
+		private System.ComponentModel.IContainer components;
 
 		#endregion
 		/************************/
@@ -392,7 +393,7 @@ namespace NcForms
 		/// </summary>
 		/// <param name="execAssy">from Assembly.GetExecutingAssembly()</param>
 		/// <returns></returns>
-		public string Version(Assembly asm, bool details = false)
+		virtual public string Version(Assembly asm, bool details = false)
 		{
 			StringBuilder strb = new StringBuilder();
 			try
