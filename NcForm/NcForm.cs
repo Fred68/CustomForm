@@ -73,6 +73,8 @@ namespace NcForms
 
 		bool askClose, closing, loading;
 
+		int minWidth;
+
 		NcFormWindowStates ncWindowsState, prevNcWindowsState;
 		private System.ComponentModel.IContainer components;
 
@@ -303,6 +305,11 @@ namespace NcForms
 		public int LowerBarHeight
 		{
 			get { return tsLower.Height + tsItemExtraWidth; }
+		}
+		public int MinWidth
+		{
+			get {return minWidth;}
+			protected set {SetMinWidth(value);}
 		}
 		/// <summary>
 		/// TimeSpan to identify a double click on upper toolbar
@@ -757,7 +764,13 @@ namespace NcForms
 			ResumeLayout(false);
 			PerformLayout();
 		}
-
+		private void SetMinWidth(int mw)
+		{
+			if(mw >= 0)
+			{
+				minWidth = mw;
+			}
+		}
 		/// <summary>
 		/// Set-up form controls' handlers
 		/// </summary>
