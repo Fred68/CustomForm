@@ -644,6 +644,7 @@ namespace NcForms
 			tsTitle.AutoSize = false;
 			tsTitle.BackColor = SystemColors.Control;
 			tsTitle.DisplayStyle = ToolStripItemDisplayStyle.Text;
+			tsTitle.Font = new Font("Segoe UI",9F,FontStyle.Bold);
 			tsTitle.ImageTransparentColor = Color.White;
 			tsTitle.Name = "tsTitle";
 			tsTitle.Size = new Size(100,22);
